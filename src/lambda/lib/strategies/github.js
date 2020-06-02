@@ -1,7 +1,6 @@
 import { Router } from "express";
 import passport from "passport";
 import { Strategy } from "passport-github";
-import get from "lodash/fp/get";
 
 const router = Router();
 
