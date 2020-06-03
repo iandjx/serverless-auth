@@ -145,7 +145,7 @@ router.use((req, _res, next) => {
               }
             })
             .catch((error) => console.log(error));
-
+          console.log(req.user);
           done(null, user);
         }
       )
