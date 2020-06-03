@@ -25,6 +25,7 @@ function App() {
         {currentUser && currentUser && currentUser.id ? (
           <>
             <img src={currentUser.id} className="App-logo" alt="logo" />
+            <p>{currentUser.id}</p>
             <p>Hello {currentUser.name}</p>
             <div className="App-link" onClick={fetchLogout}>
               Logout
