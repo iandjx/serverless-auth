@@ -49,7 +49,7 @@ router.use((req, _res, next) => {
           })
             .then((res) => res.json())
             .then((res) => {
-              user.id = res.data.users[0].id;
+              // user.id = res.data.users[0].id;
               return console.log(res);
             })
             .catch((error) => console.log(error));
