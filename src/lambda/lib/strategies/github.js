@@ -2,7 +2,7 @@ import { Router } from "express";
 import passport from "passport";
 import { Strategy } from "passport-github";
 import { GraphQLClient } from "graphql-request";
-global.fetch = require("node-fetch");
+// global.fetch = require("node-fetch");
 
 const router = Router();
 
