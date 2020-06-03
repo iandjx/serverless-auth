@@ -70,6 +70,45 @@ router.use((req, _res, next) => {
                 console.log(" user found");
                 done(null, user);
               } else {
+                const query = `mutation (
+                  $github_user_id: Int!
+                  $name: String!
+                  $bio: String
+                  $pubic_repos: Int!
+                  $public_gists: Int!
+                  $access_token: String
+                  $refresh_token: String
+                ) {
+                  insert_users(objects: {
+                  name: $name, 
+                  public_gists: $public_gists, 
+                  public_repos: $pubic_repos, 
+                  refresh_token: refresh_token, 
+                  github_user_id: $github_user_id, 
+                  bio: $bio, 
+                  access_token: $access_token}) {
+                    returning {
+                      access_token
+                      bio
+                      github_user_id
+                      id
+                      name
+                      public_gists
+                      public_repos
+                      refresh_token
+                    }
+                  }
+                }
+                 `;
+                const variables = {
+                  github_user_id: profile._json.id,
+                  name: profile._json.name,
+                  bio: profile._json.bio,
+                  pubic_repos: profile._json.public_repos,
+                  public_gists: profile._json.public_gists,
+                  access_token: accessToken,
+                  refresh_token: refreshToken,
+                };
                 fetch(
                   "https://hasura-jwt-oauth-prac.herokuapp.com/v1/graphql",
                   {
@@ -80,28 +119,8 @@ router.use((req, _res, next) => {
                         "i30LbO4dZlwjW95R8cP+D8hZ2OktZSMN",
                     },
                     body: JSON.stringify({
-                      query: `mutation MyMutation {
-                        insert_users(objects: {
-                        name: ${profile._json.name}, 
-                        public_gists: ${profile._json.public_gists}, 
-                        public_repos: ${profile._json.public_repos}, 
-                        refresh_token: ${refreshToken}, 
-                        github_user_id: ${profile._json.id}, 
-                        bio: ${profile._json.bio}, 
-                        access_token: ${accessToken}}) {
-                          returning {
-                            access_token
-                            bio
-                            github_user_id
-                            id
-                            name
-                            public_gists
-                            public_repos
-                            refresh_token
-                          }
-                        }
-                      }
-                       `,
+                      query,
+                      variables,
                     }),
                   }
                 )
