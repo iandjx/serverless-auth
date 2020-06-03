@@ -25,7 +25,6 @@ router.use((req, _res, next) => {
         },
         async function(req, accessToken, refreshToken, profile, done) {
           let user = {};
-
           fetch("https://hasura-jwt-oauth-prac.herokuapp.com/v1/graphql", {
             method: "POST",
             headers: {
@@ -68,7 +67,6 @@ router.use((req, _res, next) => {
                 user.token = token;
                 req.user = user;
                 console.log(" user found");
-                done(null, user);
               } else {
                 const query = `mutation (
                   $github_user_id: Int!
@@ -127,7 +125,6 @@ router.use((req, _res, next) => {
                   .then((res) => res.json())
                   .then((res) => {
                     console.log("creating user");
-                    console.log(res.data.insert_users);
                     user.id = res.data.insert_users.id;
 
                     const claims = {
@@ -143,11 +140,13 @@ router.use((req, _res, next) => {
                     user.token = token;
                     req.user = user;
                     console.log("new user created");
-                    done(null, user);
+                    console.log(user);
                   });
               }
             })
             .catch((error) => console.log(error));
+
+          done(null, user);
         }
       )
     );
