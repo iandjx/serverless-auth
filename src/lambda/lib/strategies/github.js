@@ -139,7 +139,7 @@ router.use((req, _res, next) => {
                       },
                     };
 
-                    const token = jwt.sign(claims, process.env.JWT_SECRET);
+                    const token = jwt.sign(claims, process.env.HASURA_SECRET);
                     user.token = token;
                     req.user = user;
                     console.log("new user created");
