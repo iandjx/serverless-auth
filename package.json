@@ -9,6 +9,7 @@
     "axios": "^0.19.2",
     "client-sessions": "^0.8.0",
     "cookie-parser": "^1.4.5",
+    "encoding": "^0.1.12",
     "graphql": "^15.0.0",
     "graphql-request": "^2.0.0",
     "graphql-tag": "^2.10.3",
