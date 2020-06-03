@@ -41,7 +41,7 @@ router.use((req, _res, next) => {
           let { data } = await axios.post(`${process.env.HASURA_ENDPOINT}`, {
             query,
             headers: {
-              "x-hasura-admin-secret": `Basic ${process.env.HASURA_SECRET}`,
+              "x-hasura-admin-secret": `${process.env.HASURA_SECRET}`,
             },
           });
 
