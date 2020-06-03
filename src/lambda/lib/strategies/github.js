@@ -23,6 +23,8 @@ router.use((req, _res, next) => {
           passReqToCallback: true,
         },
         async function(req, _token, _tokenSecret, profile, done) {
+          // let user = {};
+
           fetch("https://hasura-jwt-oauth-prac.herokuapp.com/v1/graphql", {
             method: "POST",
             headers: {
@@ -31,7 +33,7 @@ router.use((req, _res, next) => {
             },
             body: JSON.stringify({
               query: `query {
-              users(where: {github_user_id: {_eq: 3683356}}) {
+              users(where: {github_user_id: {_eq: 36833562}}) {
                 access_token
                 bio
                 github_user_id
@@ -46,7 +48,11 @@ router.use((req, _res, next) => {
             }),
           })
             .then((res) => res.json())
-            .then((res) => console.log(res.data));
+            .then((res) => {
+              user.id = res.data.users[0].id;
+              return console.log(res.data);
+            })
+            .catch((error) => console.log(error));
 
           const user = {
             id: profile.id,
