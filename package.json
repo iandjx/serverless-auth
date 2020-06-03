@@ -13,6 +13,7 @@
     "graphql": "^15.0.0",
     "graphql-request": "^2.0.0",
     "graphql-tag": "^2.10.3",
+    "isomorphic-fetch": "^2.2.1",
     "lodash": "^4.17.15",
     "node-fetch": "^2.6.0",
     "passport": "^0.4.1",

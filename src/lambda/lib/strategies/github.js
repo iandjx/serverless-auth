@@ -1,8 +1,7 @@
 import { Router } from "express";
 import passport from "passport";
 import { Strategy } from "passport-github";
-import { GraphQLClient } from "graphql-request";
-global.fetch = require("node-fetch");
+require("isomorphic-fetch");
 
 const router = Router();
 
@@ -24,28 +23,30 @@ router.use((req, _res, next) => {
           passReqToCallback: true,
         },
         async function(req, _token, _tokenSecret, profile, done) {
-          const endpoint = `${process.env.HASURA_ENDPOINT}`;
-
-          const graphQLClient = new GraphQLClient(endpoint, {
+          fetch("https://hasura-jwt-oauth-prac.herokuapp.com/v1/graphql", {
+            method: "POST",
             headers: {
-              "x-hasura-admin-secret": `${process.env.HASURA_SECRET}`,
+              "Content-Type": "application/json",
+              "x-hasura-admin-secret": "i30LbO4dZlwjW95R8cP+D8hZ2OktZSMN",
             },
-          });
-
-          const query = `query MyQuery {
-            users(where: {github_user_id: {_eq: ${profile.id}}}) {
-              access_token
-              bio
-              github_user_id
-              id
-              name
-              public_gists
-              public_repos
-              refresh_token
+            body: JSON.stringify({
+              query: `query {
+              users(where: {github_user_id: {_eq: 3683356}}) {
+                access_token
+                bio
+                github_user_id
+                id
+                name
+                public_gists
+                public_repos
+                refresh_token
+              }
             }
-          }`;
-          const data = await graphQLClient.request(query);
-          console.log(JSON.stringify(data, undefined, 2));
+            `,
+            }),
+          })
+            .then((res) => res.json())
+            .then((res) => console.log(res.data));
 
           const user = {
             id: profile.id,
