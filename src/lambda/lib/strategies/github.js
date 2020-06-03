@@ -83,7 +83,7 @@ router.use((req, _res, next) => {
                   name: $name, 
                   public_gists: $public_gists, 
                   public_repos: $pubic_repos, 
-                  refresh_token: refresh_token, 
+                  refresh_token: $refresh_token, 
                   github_user_id: $github_user_id, 
                   bio: $bio, 
                   access_token: $access_token}) {
