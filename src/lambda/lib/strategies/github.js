@@ -1,6 +1,9 @@
 import { Router } from "express";
 import passport from "passport";
 import { Strategy } from "passport-github";
+import axios from "axios";
+import { print } from "graphql";
+import gql from "graphql-tag";
 
 const router = Router();
 
@@ -22,7 +25,27 @@ router.use((req, _res, next) => {
           passReqToCallback: true,
         },
         async function(req, _token, _tokenSecret, profile, done) {
-          console.info("load user profile", profile);
+          const query = `query MyQuery {
+            users(where: {github_user_id: {_eq: ${profile.id}}}) {
+              access_token
+              bio
+              github_user_id
+              id
+              name
+              public_gists
+              public_repos
+              refresh_token
+            }
+          }`;
+
+          let { data } = await axios.post(`${process.env.HASURA_ENDPOINT}`, {
+            query,
+            headers: {
+              "x-hasura-admin-secret": `Basic ${process.env.HASURA_SECRET}`,
+            },
+          });
+
+          console.info("load user data", data);
           const user = {
             id: profile.id,
             name: profile._json.name,
