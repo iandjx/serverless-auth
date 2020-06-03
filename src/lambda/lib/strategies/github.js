@@ -50,6 +50,8 @@ router.use((req, _res, next) => {
           })
             .then((res) => res.json())
             .then((res) => {
+              console.log("entry point");
+              console.log(res);
               if (res.data.users[0] !== undefined) {
                 user.id = res.data.users[0].id;
 
@@ -105,6 +107,8 @@ router.use((req, _res, next) => {
                 )
                   .then((res) => res.json())
                   .then((res) => {
+                    console.log("creating user");
+                    console.log(res);
                     user.id = res.data.users[0].id;
 
                     const claims = {
