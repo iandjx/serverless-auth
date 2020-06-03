@@ -127,7 +127,7 @@ router.use((req, _res, next) => {
                   .then((res) => res.json())
                   .then((res) => {
                     console.log("creating user");
-                    console.log(res);
+                    console.log(res.data.insert_users);
                     user.id = res.data.insert_users[0].id;
 
                     const claims = {
