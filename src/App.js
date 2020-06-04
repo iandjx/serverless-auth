@@ -6,6 +6,21 @@ function App() {
   function eraseCookie(name) {
     document.cookie = name + "=; Max-Age=-99999999;";
   }
+  function eraseCookieFromAllPaths(name) {
+    // This function will attempt to remove a cookie from all paths.
+    var pathBits = window.location.pathname.split("/");
+    var pathCurrent = " path=";
+
+    // do a simple pathless delete first.
+    document.cookie = name + "=; expires=Thu, 01-Jan-1970 00:00:01 GMT;";
+
+    for (var i = 0; i < pathBits.length; i++) {
+      pathCurrent += (pathCurrent.substr(-1) != "/" ? "/" : "") + pathBits[i];
+      document.cookie =
+        name + "=; expires=Thu, 01-Jan-1970 00:00:01 GMT;" + pathCurrent + ";";
+    }
+  }
+
   function deleteAllCookies() {
     var cookies = document.cookie.split("; ");
     for (var c = 0; c < cookies.length; c++) {
@@ -41,12 +56,14 @@ function App() {
     });
     deleteAllCookies();
     eraseCookie("session");
+    eraseCookieFromAllPaths("session");
   }
 
   useEffect(() => {
     fetchProfile();
     deleteAllCookies();
     eraseCookie("session");
+    eraseCookieFromAllPaths("session");
   }, []);
 
   return (
@@ -60,7 +77,10 @@ function App() {
             <div className="App-link" onClick={fetchLogout}>
               Logout
             </div>
-            <div className="App-link" onClick={eraseCookie("session")}>
+            <div
+              className="App-link"
+              onClick={eraseCookieFromAllPaths("session")}
+            >
               clear cookies
             </div>
           </>
