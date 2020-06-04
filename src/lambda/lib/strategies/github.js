@@ -70,6 +70,7 @@ router.use((req, _res, next) => {
                 req.user = user;
                 return done(null, user);
               } else {
+                let newUser = {};
                 const query = `mutation (
                   $github_user_id: Int!
                   $name: String!
@@ -138,16 +139,15 @@ router.use((req, _res, next) => {
                       },
                     };
                     const token = jwt.sign(claims, process.env.HASURA_SECRET);
-                    const user = {
+                    newUser = {
                       id: res.data.insert_users.returning.id,
                       token: token,
                       userName: res.data.insert_users.returning.name,
                     };
-                    console.log(user);
-
-                    req.user = user;
-                    return done(null, user);
                   });
+                console.log(newUser);
+                req.user = newUser;
+                return done(null, newUser);
               }
             });
         }
@@ -168,7 +168,7 @@ router.get(
   "/github/callback",
   passport.authenticate("github", { failureRedirect: "/" }),
   function callback(req, res) {
-    console.log(req);
+    // console.log(req);
     console.info(`login user ${req.user && req.user.id} and redirect`);
 
     return req.login(req.user, async function callbackLogin(loginErr) {
