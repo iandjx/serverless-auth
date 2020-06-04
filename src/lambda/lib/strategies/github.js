@@ -143,6 +143,7 @@ router.use((req, _res, next) => {
                       token: token,
                       userName: res.data.insert_users.returning.name,
                     };
+                    console.log(user);
 
                     req.user = user;
                     return done(null, user);
