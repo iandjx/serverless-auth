@@ -54,9 +54,6 @@ function App() {
     await fetch("/.netlify/functions/auth/logout").then((res) => {
       setCurrentUser({});
     });
-    deleteAllCookies();
-    eraseCookie("session");
-    eraseCookieFromAllPaths("session");
   }
 
   useEffect(() => {
@@ -74,12 +71,12 @@ function App() {
             <div className="App-link" onClick={fetchLogout}>
               Logout
             </div>
-            <div
+            {/* <div
               className="App-link"
               onClick={eraseCookieFromAllPaths("session")}
             >
               clear cookies
-            </div>
+            </div> */}
           </>
         ) : (
           <>
