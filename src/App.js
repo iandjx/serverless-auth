@@ -13,8 +13,7 @@ function App() {
           "=; expires=Thu, 01-Jan-1970 00:00:01 GMT; domain=" +
           d.join(".") +
           " ;path=";
-        // eslint-disable-next-line no-restricted-globals
-        var p = location.pathname.split("/");
+        var p = window.location.pathname.split("/");
         document.cookie = cookieBase + "/";
         while (p.length > 0) {
           document.cookie = cookieBase + p.join("/");
