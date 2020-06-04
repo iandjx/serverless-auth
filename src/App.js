@@ -13,7 +13,11 @@ function App() {
 
   async function fetchLogout() {
     await fetch("/.netlify/functions/auth/logout").then((res) => {
-      console.log(res);
+      document.cookie.split(";").forEach(function(c) {
+        document.cookie = c
+          .replace(/^ +/, "")
+          .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      });
       setCurrentUser({});
     });
   }
