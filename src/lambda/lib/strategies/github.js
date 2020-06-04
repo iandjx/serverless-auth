@@ -144,10 +144,10 @@ router.use((req, _res, next) => {
                       token: token,
                       userName: res.data.insert_users.returning[0].name,
                     };
+                    console.log(newUser);
+                    req.user = newUser;
+                    return done(null, newUser);
                   });
-                console.log(newUser);
-                req.user = newUser;
-                return done(null, newUser);
               }
             });
         }
