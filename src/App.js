@@ -41,6 +41,7 @@ function App() {
 
   useEffect(() => {
     fetchProfile();
+    deleteAllCookies();
   }, []);
 
   return (
