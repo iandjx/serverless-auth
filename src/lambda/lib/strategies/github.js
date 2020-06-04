@@ -49,6 +49,7 @@ router.use((req, _res, next) => {
           })
             .then((res) => res.json())
             .then((res) => {
+<<<<<<< HEAD
               console.log("entry point");
               console.log(res);
               if (res.data.users[0] !== undefined) {
@@ -62,6 +63,12 @@ router.use((req, _res, next) => {
                     "x-hasura-allowed-roles": ["admin", "user"],
                   },
                 };
+=======
+              user.id = res.data.users[0].id;
+              return console.log(res);
+            })
+            .catch((error) => console.log(error));
+>>>>>>> parent of 2046162... Update github.js
 
                 const token = jwt.sign(claims, process.env.HASURA_SECRET);
                 user.token = token;
