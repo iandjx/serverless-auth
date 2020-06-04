@@ -50,7 +50,7 @@ router.use((req, _res, next) => {
             .then((res) => res.json())
             .then((res) => {
               console.log("entry point");
-              console.log(res);
+              console.log(res.data);
               if (res.data.users[0] !== undefined) {
                 user.id = res.data.users[0].id;
 
