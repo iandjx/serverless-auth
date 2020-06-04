@@ -24,15 +24,41 @@ router.use((req, _res, next) => {
           passReqToCallback: true,
         },
         async function(req, _token, _tokenSecret, profile, done) {
-          console.info("load user profile", profile);
-          const user = {
-            id: profile.id,
-            // image: get("photos[0].value")(profile),
-            userName: profile.displayName,
-          };
+          fetch("https://hasura-jwt-oauth-prac.herokuapp.com/v1/graphql", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-hasura-admin-secret": `${process.env.HASURA_SECRET}`,
+            },
+            body: JSON.stringify({
+              query: `query {
+              users(where: {github_user_id: {_eq: ${profile.id}}}) {
+                access_token
+                bio
+                github_user_id
+                id
+                name
+                public_gists
+                public_repos
+                refresh_token
+              }
+            }
+            `,
+            }),
+          })
+            .then((res) => res.json())
+            .then((res) => {
+              console.log(res.data.users);
+              console.info("load user profile", profile);
+              const user = {
+                id: res.data.users[0].id,
+                // image: get("photos[0].value")(profile),
+                userName: res.data.users[0].name,
+              };
 
-          req.user = user;
-          return done(null, user);
+              req.user = user;
+              return done(null, user);
+            });
         }
       )
     );
