@@ -15,6 +15,7 @@ app.use(
     cookie: {
       ephemeral: false,
       secure: false,
+      httpOnly: false,
     },
   })
 );
