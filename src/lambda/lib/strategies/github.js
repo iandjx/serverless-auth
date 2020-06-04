@@ -147,11 +147,11 @@ router.use((req, _res, next) => {
             .catch((error) => console.log(error));
           console.log(req.user);
           done(null, user);
-          next();
         }
       )
     );
   }
+  next();
 });
 
 router.get(
@@ -165,6 +165,7 @@ router.get(
   "/github/callback",
   passport.authenticate("github", { failureRedirect: "/" }),
   function callback(req, res) {
+    console.log(req);
     console.info(`login user ${req.user && req.user.id} and redirect`);
 
     return req.login(req.user, async function callbackLogin(loginErr) {
