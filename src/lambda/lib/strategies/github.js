@@ -48,9 +48,9 @@ router.use((req, _res, next) => {
           })
             .then((res) => res.json())
             .then((res) => {
-              console.log(res.data.users[0].id !== undefined);
+              // console.log(res.data.users[0].id !== undefined);
               // console.info("load user profile", profile);
-              if (res.data.users[0].id !== undefined) {
+              if (res.data.users[0] !== undefined) {
                 const user = {
                   id: res.data.users[0].id,
                   // image: get("photos[0].value")(profile),
