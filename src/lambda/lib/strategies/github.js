@@ -129,18 +129,19 @@ router.use((req, _res, next) => {
                     console.log(res.data.insert_users);
 
                     const claims = {
-                      sub: "" + res.data.insert_users.id,
+                      sub: "" + res.data.insert_users.returning.id,
                       "https://hasura.io/jwt/claims": {
                         "x-hasura-default-role": "admin",
-                        "x-hasura-user-id": "" + res.data.insert_users.id,
+                        "x-hasura-user-id":
+                          "" + res.data.insert_users.returning.id,
                         "x-hasura-allowed-roles": ["admin", "user"],
                       },
                     };
                     const token = jwt.sign(claims, process.env.HASURA_SECRET);
                     const user = {
-                      id: res.data.insert_users.id,
+                      id: res.data.insert_users.returning.id,
                       token: token,
-                      userName: res.data.insert_users.name,
+                      userName: res.data.insert_users.returning.name,
                     };
 
                     req.user = user;
