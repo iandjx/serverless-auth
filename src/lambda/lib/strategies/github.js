@@ -48,7 +48,7 @@ router.use((req, _res, next) => {
           })
             .then((res) => res.json())
             .then((res) => {
-              console.log(res.data.users.id !== undefined);
+              console.log(res.data.users[0].id !== undefined);
               // console.info("load user profile", profile);
               if (res.data.users[0].id !== undefined) {
                 const user = {
@@ -57,6 +57,14 @@ router.use((req, _res, next) => {
                   userName: res.data.users[0].name,
                 };
 
+                req.user = user;
+                return done(null, user);
+              } else {
+                const user = {
+                  id: 12312312312,
+                  // image: get("photos[0].value")(profile),
+                  userName: "alalal",
+                };
                 req.user = user;
                 return done(null, user);
               }
