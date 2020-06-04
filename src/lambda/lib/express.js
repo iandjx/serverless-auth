@@ -39,6 +39,9 @@ app.get("/.netlify/functions/auth/logout", (req, res) => {
   console.info("logout");
   req.logout();
   res.send({ success: 1, code: "user.logout" });
+  req.session.destroy(function(err) {
+    res.redirect("/"); //Inside a callback… bulletproof!
+  });
 });
 
 app.use("/.netlify/functions/auth", github);
