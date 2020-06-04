@@ -23,6 +23,7 @@ app.use(passport.session());
 
 passport.serializeUser((user, done) => done(user ? null : "null user", user));
 passport.deserializeUser((user, done) => {
+  console.log(jwt.verify("080823", process.env.HASURA_SECRET));
   if (jwt.verify("080823", process.env.HASURA_SECRET)) {
     return done(null, user);
   }
