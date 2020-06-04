@@ -61,9 +61,6 @@ function App() {
 
   useEffect(() => {
     fetchProfile();
-    deleteAllCookies();
-    eraseCookie("session");
-    eraseCookieFromAllPaths("session");
   }, []);
 
   return (
