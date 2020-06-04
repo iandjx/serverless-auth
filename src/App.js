@@ -40,6 +40,7 @@ function App() {
       setCurrentUser({});
     });
     deleteAllCookies();
+    eraseCookie("session");
   }
 
   useEffect(() => {
@@ -58,6 +59,9 @@ function App() {
             <p>{JSON.stringify(currentUser)}</p>
             <div className="App-link" onClick={fetchLogout}>
               Logout
+            </div>
+            <div className="App-link" onClick={eraseCookie("session")}>
+              clear cookies
             </div>
           </>
         ) : (
