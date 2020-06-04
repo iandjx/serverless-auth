@@ -3,6 +3,9 @@ import logo from "./logo.svg";
 import "./App.css";
 
 function App() {
+  function eraseCookie(name) {
+    document.cookie = name + "=; Max-Age=-99999999;";
+  }
   function deleteAllCookies() {
     var cookies = document.cookie.split("; ");
     for (var c = 0; c < cookies.length; c++) {
@@ -42,6 +45,7 @@ function App() {
   useEffect(() => {
     fetchProfile();
     deleteAllCookies();
+    eraseCookie("session");
   }, []);
 
   return (
