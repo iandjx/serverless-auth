@@ -70,7 +70,7 @@ router.use((req, _res, next) => {
                 req.user = user;
                 return done(null, user);
               } else {
-                let newUser = {};
+                var newUser;
                 const query = `mutation (
                   $github_user_id: Int!
                   $name: String!
@@ -130,19 +130,19 @@ router.use((req, _res, next) => {
                     console.log(res.data.insert_users);
 
                     const claims = {
-                      sub: "" + res.data.insert_users.returning.id,
+                      sub: "" + res.data.insert_users.returning[0].id,
                       "https://hasura.io/jwt/claims": {
                         "x-hasura-default-role": "admin",
                         "x-hasura-user-id":
-                          "" + res.data.insert_users.returning.id,
+                          "" + res.data.insert_users.returning[0].id,
                         "x-hasura-allowed-roles": ["admin", "user"],
                       },
                     };
                     const token = jwt.sign(claims, process.env.HASURA_SECRET);
                     newUser = {
-                      id: res.data.insert_users.returning.id,
+                      id: res.data.insert_users.returning[0].id,
                       token: token,
-                      userName: res.data.insert_users.returning.name,
+                      userName: res.data.insert_users.returning[0].name,
                     };
                   });
                 console.log(newUser);
