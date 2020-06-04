@@ -12,11 +12,10 @@ function App() {
   }
 
   async function fetchLogout() {
-    await fetch("/.netlify/functions/auth/logout").then(
-      (res)=>{
-        console.log(res);
-        setCurrentUser({})
-      })};
+    await fetch("/.netlify/functions/auth/logout").then((res) => {
+      console.log(res);
+      setCurrentUser({});
+    });
   }
 
   useEffect(() => {
