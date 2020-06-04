@@ -23,8 +23,10 @@ app.use(passport.session());
 
 passport.serializeUser((user, done) => done(user ? null : "null user", user));
 passport.deserializeUser((user, done) => {
-  console.log(jwt.verify(user.token, process.env.HASURA_SECRET));
-  return done(null, user);
+  if (jwt.verify("080823", process.env.HASURA_SECRET)) {
+    return done(null, user);
+  }
+  return done(null, false, { message: "Invalid credentials" });
 });
 
 app.get("/.netlify/functions/auth/me", (req, res) =>
