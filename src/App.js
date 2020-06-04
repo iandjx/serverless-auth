@@ -71,12 +71,12 @@ function App() {
             <div className="App-link" onClick={fetchLogout}>
               Logout
             </div>
-            {/* <div
+            <div
               className="App-link"
               onClick={eraseCookieFromAllPaths("session")}
             >
               clear cookies
-            </div> */}
+            </div>
           </>
         ) : (
           <>
