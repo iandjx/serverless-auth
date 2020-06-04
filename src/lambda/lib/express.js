@@ -4,7 +4,7 @@ import passport from "passport";
 import cookieParser from "cookie-parser";
 
 import github from "./strategies/github";
-
+const jwt = require("jsonwebtoken");
 const app = express();
 
 app.use(cookieParser());
@@ -21,8 +21,11 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-passport.serializeUser((user, cb) => cb(user ? null : "null user", user));
-passport.deserializeUser((user, cb) => cb(user ? null : "null user", user));
+passport.serializeUser((user, done) => done(user ? null : "null user", user));
+passport.deserializeUser((user, done) => {
+  console.log(jwt.verify(user.token, process.env.HASURA_SECRET));
+  return done(null, user);
+});
 
 app.get("/.netlify/functions/auth/me", (req, res) =>
   res.send(req.user ? req.user : {})
