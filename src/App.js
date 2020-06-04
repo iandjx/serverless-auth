@@ -26,6 +26,7 @@ function App() {
           <>
             <p>{currentUser.token}</p>
             <p>Hello {currentUser.name}</p>
+            <p>{JSON.stringify(currentUser)}</p>
             <div className="App-link" onClick={fetchLogout}>
               Logout
             </div>
