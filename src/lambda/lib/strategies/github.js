@@ -62,7 +62,6 @@ router.use((req, _res, next) => {
                     "x-hasura-allowed-roles": ["admin", "user"],
                   },
                 };
-              user.id = res.data.users[0].id;
 
                 const token = jwt.sign(claims, process.env.HASURA_SECRET);
                 user.token = token;
