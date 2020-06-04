@@ -39,8 +39,15 @@ app.get("/.netlify/functions/auth/logout", (req, res) => {
   console.info("logout");
   req.logout();
   res.send({ success: 1, code: "user.logout" });
+  res.status(200).clearCookie("connect.sid", {
+    path: "/",
+    secure: false,
+    httpOnly: false,
+    domain: "unruffled-chandrasekhar-5f70aa.netlify.app",
+    sameSite: true,
+  });
   req.session.destroy(function(err) {
-    res.redirect("/"); //Inside a callback… bulletproof!
+    res.redirect("/");
   });
 });
 
