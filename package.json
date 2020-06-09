@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@material-ui/core": "^4.10.1",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
@@ -19,7 +20,9 @@
     "node-fetch": "^2.6.0",
     "passport": "^0.4.1",
     "passport-github": "^1.1.0",
+    "passport-github2": "^0.1.12",
     "passport-google-oauth20": "^2.0.0",
+    "passport-jwt": "^4.0.0",
     "react": "^16.13.1",
     "react-cookie": "^4.0.3",
     "react-dom": "^16.13.1",

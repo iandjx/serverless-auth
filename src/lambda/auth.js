@@ -1,12 +1,40 @@
-import serverless from "serverless-http";
-import app from "./lib/express";
+const bodyParser = require(`body-parser`);
+const cookieParser = require(`cookie-parser`);
+const express = require(`express`);
+const passport = require(`passport`);
+const serverless = require(`serverless-http`);
 
-process.on("uncaughtException", (err) => {
-  console.error(`uncaughtException ${err.toString()}`);
-});
+require(`./utils/auth`);
 
-process.on("unhandledRejection", (reason) => {
-  console.error(`unhandledRejection ${reason}`);
-});
+const { COOKIE_SECURE, ENDPOINT } = require(`./utils/config`);
 
-exports.handler = serverless(app);
+const app = express();
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(cookieParser());
+app.use(passport.initialize());
+
+const handleCallback = () => (req, res) => {
+  res
+    .cookie(`jwt`, req.user.jwt, { httpOnly: true, COOKIE_SECURE })
+    .redirect(`/`);
+};
+
+app.get(
+  `${ENDPOINT}/auth/github`,
+  passport.authenticate(`github`, { session: false })
+);
+app.get(
+  `${ENDPOINT}/auth/github/callback`,
+  passport.authenticate(`github`, { failureRedirect: `/`, session: false }),
+  handleCallback()
+);
+
+app.get(
+  `${ENDPOINT}/auth/status`,
+  passport.authenticate(`jwt`, { session: false }),
+  (req, res) => res.json({ id: req.user.id })
+);
+
+module.exports.handler = serverless(app);

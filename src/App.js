@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import logo from "./logo.svg";
 import "./App.css";
+import RepositoryList from "./components/RepositoryList";
 
 function App() {
   function eraseCookieFromAllPaths(name) {
@@ -20,18 +21,21 @@ function App() {
 
   const [currentUser, setCurrentUser] = useState({});
 
+  const endpoint =
+    process.env.NODE_ENV === "development" ? "/.netlify/functions" : "/api";
+
   async function fetchProfile() {
-    await fetch("/.netlify/functions/auth/me").then((res) =>
+    await fetch(`${endpoint}/auth/status`).then((res) =>
       res.json().then((res) => setCurrentUser(res))
     );
   }
 
-  async function fetchLogout() {
-    await fetch("/.netlify/functions/auth/logout").then((res) => {
-      setCurrentUser({});
-    });
-    eraseCookieFromAllPaths("session");
-  }
+  // async function fetchLogout() {
+  //   await fetch("/.netlify/functions/auth/logout").then((res) => {
+  //     setCurrentUser({});
+  //   });
+  //   eraseCookieFromAllPaths("session");
+  // }
 
   useEffect(() => {
     fetchProfile();
@@ -42,12 +46,13 @@ function App() {
       <header className="App-header">
         {currentUser && currentUser && currentUser.id ? (
           <>
-            <p>{currentUser.token}</p>
-            <p>Hello {currentUser.userName}</p>
+            {console.log(JSON.stringify(currentUser))}
+            {/* <p>{currentUser}</p> */}
+            <p>Hello {currentUser.id.sub}</p>
             <p>{JSON.stringify(currentUser)}</p>
-            <div className="App-link" onClick={fetchLogout}>
+            {/* <div className="App-link" onClick={fetchLogout}>
               Logout
-            </div>
+            </div> */}
           </>
         ) : (
           <>
@@ -55,15 +60,14 @@ function App() {
             <p>Sample demo to show Netlify login with PassportJS</p>
             <a
               className="App-link"
-              href={`/.netlify/functions/auth/github?host=${
-                window.location.origin
-              }`}
+              href={`${endpoint}/auth/github?host=${window.location.origin}`}
             >
               Login with Github
             </a>
           </>
         )}
       </header>
+      <RepositoryList />
     </div>
   );
 }
