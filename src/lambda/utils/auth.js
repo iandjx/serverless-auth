@@ -15,8 +15,8 @@ const {
   HASURA_SECRET,
 } = require(`./config`);
 
-function authJwt(id) {
-  return sign({ user: { id } }, HASURA_SECRET);
+function authJwt(claims) {
+  return sign(claims, HASURA_SECRET);
 }
 
 // eslint-disable-next-line no-console
@@ -32,7 +32,7 @@ passport.use(
       scope: [`user:email`],
     },
     async (accessToken, refreshToken, profile, done) => {
-      console.log(profile);
+      // console.log(profile);
       fetch(`${HASURA_ENDPOINT}`, {
         method: "POST",
         headers: {
@@ -57,14 +57,13 @@ passport.use(
         // eslint-disable-next-line arrow-parens
         .then((res) => res.json())
         .then((res) => {
-          console.log(res);
+          // console.log(res);
           if (res.data.users[0] !== undefined) {
             const claims = {
-              sub: "" + res.data.users[0].id,
               "https://hasura.io/jwt/claims": {
-                "x-hasura-default-role": "admin",
+                "x-hasura-default-role": "user",
                 "x-hasura-user-id": "" + res.data.users[0].id,
-                "x-hasura-allowed-roles": ["admin", "user"],
+                "x-hasura-allowed-roles": ["user"],
               },
             };
 
@@ -75,8 +74,8 @@ passport.use(
             };
 
             // req.user = user;
-            console.log("jwt " + jwt);
-            console.log("user" + user);
+            // console.log("jwt " + jwt);
+            // console.log("user" + user);
             const id = user.id;
             return done(null, { id, jwt });
           } else {
@@ -118,11 +117,10 @@ passport.use(
                 console.log(res);
 
                 const claims = {
-                  sub: "" + res.data.insert_users_one.id,
                   "https://hasura.io/jwt/claims": {
-                    "x-hasura-default-role": "admin",
+                    "x-hasura-default-role": "user",
                     "x-hasura-user-id": "" + res.data.insert_users_one.id,
-                    "x-hasura-allowed-roles": ["admin", "user"],
+                    "x-hasura-allowed-roles": ["user"],
                   },
                 };
                 const jwt = authJwt(claims);
@@ -132,8 +130,8 @@ passport.use(
                 };
 
                 // req.user = user;
-                console.log("jwt " + jwt);
-                console.log("user" + user);
+                // console.log("jwt " + jwt);
+                // console.log("user" + user);
                 const id = user.id;
                 return done(null, { id, jwt });
               });
@@ -143,25 +141,28 @@ passport.use(
   )
 );
 
-passport.use(
-  new passportJwt.Strategy(
-    {
-      jwtFromRequest(req) {
-        if (!req.cookies) throw new Error(`Missing cookie-parser middleware`);
-        return req.cookies.jwt;
-      },
-      secretOrKey: HASURA_SECRET,
-    },
-    async ({ user: { id } }, done) => {
-      try {
-        // Here you'd typically load an existing user
-        // and use their data to create the JWT.
-        const jwt = authJwt(id);
+// passport.use(
+//   new passportJwt.Strategy(
+//     {
+//       jwtFromRequest(req) {
+//         console.log(req.cookies.jwt);
+//         if (!req.cookies) throw new Error(`Missing cookie-parser middleware`);
+//         return req.cookies.jwt;
+//       },
+//       secretOrKey: HASURA_SECRET,
+//     },
+//     async (jwt, done) => {
+//       try {
+//         console.log('logging ' + jwt)
+//         console.log(jwt);
+//         // Here you'd typically load an existing user
+//         // and use their data to create the JWT.
+//         const jwt = authJwt(id);
 
-        return done(null, { id, jwt });
-      } catch (error) {
-        return done(error);
-      }
-    }
-  )
-);
+//         return done(null, { id, jwt });
+//       } catch (error) {
+//         return done(error);
+//       }
+//     }
+//   )
+// );

@@ -31,7 +31,6 @@ const Repository = (props) => {
 
   return (
     <Card className={classes.root}>
-      {console.log(project)}
       <CardContent>
         <Typography variant="h5" component="h2">
           {project.owner} / {project.name}

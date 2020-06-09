@@ -6,13 +6,16 @@ import * as serviceWorker from "./serviceWorker";
 import RepositoryList from "./components/RepositoryList";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Repository from "./components/Repository";
+import { RecoilRoot } from "recoil";
 
 ReactDOM.render(
   <React.StrictMode>
-    <CssBaseline />
-    {/* <App /> */}
-    <RepositoryList />
-    {/* <Repository /> */}
+    <RecoilRoot>
+      <CssBaseline />
+      <App />
+      {/* <RepositoryList /> */}
+      {/* <Repository /> */}
+    </RecoilRoot>
   </React.StrictMode>,
   document.getElementById("root")
 );
