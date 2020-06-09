@@ -33,7 +33,7 @@ app.get(
 
 app.get(
   `${ENDPOINT}/auth/status`,
-  passport.authenticate(`github`, { session: false }),
+  passport.authenticate(`jwt`, { session: false }),
   (req, res) => res.json({ id: req.user.id })
 );
 

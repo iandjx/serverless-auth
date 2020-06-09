@@ -27,7 +27,6 @@
     "react-cookie": "^4.0.3",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1",
-    "recoil": "^0.0.8",
     "serverless-http": "^2.5.0"
   },
   "scripts": {

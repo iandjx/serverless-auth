@@ -31769,7 +31769,7 @@ app.get(`${ENDPOINT}/auth/github/callback`, passport.authenticate(`github`, {
   failureRedirect: `/`,
   session: false
 }), handleCallback());
-app.get(`${ENDPOINT}/auth/status`, passport.authenticate(`github`, {
+app.get(`${ENDPOINT}/auth/status`, passport.authenticate(`jwt`, {
   session: false
 }), (req, res) => res.json({
   id: req.user.id
@@ -31810,8 +31810,12 @@ const {
   HASURA_SECRET
 } = __webpack_require__(/*! ./config */ "./utils/config.js");
 
-function authJwt(claims) {
-  return sign(claims, HASURA_SECRET);
+function authJwt(id) {
+  return sign({
+    user: {
+      id
+    }
+  }, HASURA_SECRET);
 } // eslint-disable-next-line no-console
 
 
@@ -31823,7 +31827,7 @@ passport.use(new GitHubStrategy({
   // eslint-disable-next-line comma-dangle
   scope: [`user:email`]
 }, async (accessToken, refreshToken, profile, done) => {
-  // console.log(profile);
+  console.log(profile);
   fetch(`${HASURA_ENDPOINT}`, {
     method: "POST",
     headers: {
@@ -31846,13 +31850,15 @@ passport.use(new GitHubStrategy({
     })
   }) // eslint-disable-next-line arrow-parens
   .then(res => res.json()).then(res => {
-    // console.log(res);
+    console.log(res);
+
     if (res.data.users[0] !== undefined) {
       const claims = {
+        sub: "" + res.data.users[0].id,
         "https://hasura.io/jwt/claims": {
-          "x-hasura-default-role": "user",
+          "x-hasura-default-role": "admin",
           "x-hasura-user-id": "" + res.data.users[0].id,
-          "x-hasura-allowed-roles": ["user"]
+          "x-hasura-allowed-roles": ["admin", "user"]
         }
       };
       const jwt = authJwt(claims);
@@ -31860,9 +31866,9 @@ passport.use(new GitHubStrategy({
         id: res.data.users[0].id,
         userName: res.data.users[0].name
       }; // req.user = user;
-      // console.log("jwt " + jwt);
-      // console.log("user" + user);
 
+      console.log("jwt " + jwt);
+      console.log("user" + user);
       const id = user.id;
       return done(null, {
         id,
@@ -31903,10 +31909,11 @@ passport.use(new GitHubStrategy({
       }).then(res => res.json()).then(res => {
         console.log(res);
         const claims = {
+          sub: "" + res.data.insert_users_one.id,
           "https://hasura.io/jwt/claims": {
-            "x-hasura-default-role": "user",
+            "x-hasura-default-role": "admin",
             "x-hasura-user-id": "" + res.data.insert_users_one.id,
-            "x-hasura-allowed-roles": ["user"]
+            "x-hasura-allowed-roles": ["admin", "user"]
           }
         };
         const jwt = authJwt(claims);
@@ -31914,9 +31921,9 @@ passport.use(new GitHubStrategy({
           id: res.data.insert_users_one.id,
           userName: res.data.insert_users_one.login
         }; // req.user = user;
-        // console.log("jwt " + jwt);
-        // console.log("user" + user);
 
+        console.log("jwt " + jwt);
+        console.log("user" + user);
         const id = user.id;
         return done(null, {
           id,
@@ -31925,30 +31932,31 @@ passport.use(new GitHubStrategy({
       });
     }
   });
-})); // passport.use(
-//   new passportJwt.Strategy(
-//     {
-//       jwtFromRequest(req) {
-//         console.log(req.cookies.jwt);
-//         if (!req.cookies) throw new Error(`Missing cookie-parser middleware`);
-//         return req.cookies.jwt;
-//       },
-//       secretOrKey: HASURA_SECRET,
-//     },
-//     async (jwt, done) => {
-//       try {
-//         console.log('logging ' + jwt)
-//         console.log(jwt);
-//         // Here you'd typically load an existing user
-//         // and use their data to create the JWT.
-//         const jwt = authJwt(id);
-//         return done(null, { id, jwt });
-//       } catch (error) {
-//         return done(error);
-//       }
-//     }
-//   )
-// );
+}));
+passport.use(new passportJwt.Strategy({
+  jwtFromRequest(req) {
+    if (!req.cookies) throw new Error(`Missing cookie-parser middleware`);
+    return req.cookies.jwt;
+  },
+
+  secretOrKey: HASURA_SECRET
+}, async ({
+  user: {
+    id
+  }
+}, done) => {
+  try {
+    // Here you'd typically load an existing user
+    // and use their data to create the JWT.
+    const jwt = authJwt(id);
+    return done(null, {
+      id,
+      jwt
+    });
+  } catch (error) {
+    return done(error);
+  }
+}));
 
 /***/ }),
 

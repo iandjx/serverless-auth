@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
+import Button from "@material-ui/core/Button";
 import Repository from "./Repository";
-import { useSetRecoilState, useRecoilState } from "recoil";
-import { repositoryList } from "../store";
 require(`isomorphic-fetch`);
 
 const query = `query  {
@@ -23,8 +22,8 @@ const query = `query  {
   `;
 
 const RepositoryList = () => {
-  const updateList = useSetRecoilState(repositoryList);
-  const projectList = useRecoilState(repositoryList);
+  const [projectList, setProjectList] = useState([]);
+
   useEffect(() => {
     fetch("https://code-accel-backend.herokuapp.com/v1/graphql", {
       method: "POST",
@@ -38,18 +37,17 @@ const RepositoryList = () => {
     })
       .then((response) => response.json())
       .then((response) => {
-        console.log(response.data.repositories);
-        updateList((oldList) => [...oldList, ...response.data.repositories]);
+        console.log(JSON.stringify(response.data));
+        return setProjectList(response.data);
       })
       .catch((error) => console.log(error));
-  }, [updateList]);
+  }, []);
   return (
     <div>
-      {projectList[0] &&
-        projectList[0].map((project) => (
-          <React.Fragment key={project.id}>
-            <Repository project={project} />
-          </React.Fragment>
+      {/* {console.log(projectList.repositories)} */}
+      {projectList.repositories &&
+        projectList.repositories.map((project) => (
+          <Repository key={project.id} project={project} />
         ))}
     </div>
   );

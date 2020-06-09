@@ -1,1 +1,0 @@
-export { repositoryList } from "./atom";
