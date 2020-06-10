@@ -31759,7 +31759,7 @@ const handleCallback = () => (req, res) => {
   res.cookie(`jwt`, req.user.jwt, {
     httpOnly: false,
     COOKIE_SECURE
-  }).redirect(`/login`);
+  }).redirect(`/repositoryList`);
 };
 
 app.get(`${ENDPOINT}/auth/github`, passport.authenticate(`github`, {
@@ -31772,7 +31772,8 @@ app.get(`${ENDPOINT}/auth/github/callback`, passport.authenticate(`github`, {
 app.get(`${ENDPOINT}/auth/status`, passport.authenticate(`jwt`, {
   session: false
 }), (req, res) => res.json({
-  id: req.user.id
+  id: req.user.id,
+  username: req.user.username
 }));
 module.exports.handler = serverless(app);
 
@@ -31847,6 +31848,7 @@ passport.use(new GitHubStrategy({
     if (res.data.users[0] !== undefined) {
       const claims = {
         sub: "" + res.data.users[0].id,
+        login: "" + profile._json.login,
         "https://hasura.io/jwt/claims": {
           "x-hasura-default-role": "admin",
           "x-hasura-user-id": "" + res.data.users[0].id,
@@ -31860,8 +31862,10 @@ passport.use(new GitHubStrategy({
       }; // req.user = user;
 
       const id = user.id;
+      const username = user.userName;
       return done(null, {
         id,
+        username,
         jwt
       });
     } else {
@@ -31899,6 +31903,7 @@ passport.use(new GitHubStrategy({
       }).then(res => res.json()).then(res => {
         const claims = {
           sub: "" + res.data.insert_users_one.id,
+          login: "" + profile._json.login,
           "https://hasura.io/jwt/claims": {
             "x-hasura-default-role": "admin",
             "x-hasura-user-id": "" + res.data.insert_users_one.id,
@@ -31912,8 +31917,10 @@ passport.use(new GitHubStrategy({
         }; // req.user = user;
 
         const id = user.id;
+        const username = user.userName;
         return done(null, {
           id,
+          username,
           jwt
         });
       });
@@ -31929,10 +31936,13 @@ passport.use(new passportJwt.Strategy({
   secretOrKey: HASURA_SECRET
 }, async (req, done) => {
   try {
+    console.log(req);
     const ijwt = authJwt(req);
     const id = req.sub;
+    const username = req.login;
     return done(null, {
       id,
+      username,
       ijwt
     });
   } catch (error) {

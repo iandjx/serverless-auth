@@ -18,7 +18,7 @@ app.use(passport.initialize());
 const handleCallback = () => (req, res) => {
   res
     .cookie(`jwt`, req.user.jwt, { httpOnly: false, COOKIE_SECURE })
-    .redirect(`/login`);
+    .redirect(`/repositoryList`);
 };
 
 app.get(
@@ -34,7 +34,7 @@ app.get(
 app.get(
   `${ENDPOINT}/auth/status`,
   passport.authenticate(`jwt`, { session: false }),
-  (req, res) => res.json({ id: req.user.id })
+  (req, res) => res.json({ id: req.user.id, username: req.user.username })
 );
 
 module.exports.handler = serverless(app);

@@ -1,7 +1,8 @@
 import React from "react";
 import { Switch, Route, Link } from "react-router-dom";
-import Auth from "./components/Auth";
 import RepositoryList from "./components/RepositoryList";
+const endpoint =
+  process.env.NODE_ENV === "development" ? "/.netlify/functions" : "/api";
 
 const App = () => {
   return (
@@ -11,7 +12,9 @@ const App = () => {
           <Link to="/">test</Link>
         </li>
         <li>
-          <Link to="/login">Auth</Link>
+          <a href={`${endpoint}/auth/github?host=${window.location.origin}`}>
+            Login
+          </a>
         </li>
         <li>
           <Link to="/repositoryList">repo</Link>
@@ -30,9 +33,6 @@ const App = () => {
       <Switch>
         <Route exact path="/">
           <Home />
-        </Route>
-        <Route path="/login">
-          <Auth />
         </Route>
         <Route path="/repositoryList">
           <RepositoryList />

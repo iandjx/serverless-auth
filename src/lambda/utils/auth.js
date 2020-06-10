@@ -58,6 +58,7 @@ passport.use(
           if (res.data.users[0] !== undefined) {
             const claims = {
               sub: "" + res.data.users[0].id,
+              login: "" + profile._json.login,
               "https://hasura.io/jwt/claims": {
                 "x-hasura-default-role": "admin",
                 "x-hasura-user-id": "" + res.data.users[0].id,
@@ -74,7 +75,8 @@ passport.use(
             // req.user = user;
 
             const id = user.id;
-            return done(null, { id, jwt });
+            const username = user.userName;
+            return done(null, { id, username, jwt });
           } else {
             const query = `mutation ($access_token: String, $email: String , $github_user_id: Int, $login: String, $node_id: String, $refresh_token: String) {
               insert_users_one(object: {access_token: $access_token, email: $email, github_user_id: $github_user_id, login: $login, node_id: $node_id, refresh_token: $refresh_token}) {
@@ -113,6 +115,7 @@ passport.use(
               .then((res) => {
                 const claims = {
                   sub: "" + res.data.insert_users_one.id,
+                  login: "" + profile._json.login,
                   "https://hasura.io/jwt/claims": {
                     "x-hasura-default-role": "admin",
                     "x-hasura-user-id": "" + res.data.insert_users_one.id,
@@ -128,7 +131,8 @@ passport.use(
                 // req.user = user;
 
                 const id = user.id;
-                return done(null, { id, jwt });
+                const username = user.userName;
+                return done(null, { id, username, jwt });
               });
           }
         });
@@ -147,9 +151,11 @@ passport.use(
     },
     async (req, done) => {
       try {
+        console.log(req);
         const ijwt = authJwt(req);
         const id = req.sub;
-        return done(null, { id, ijwt });
+        const username = req.login;
+        return done(null, { id, username, ijwt });
       } catch (error) {
         return done(error);
       }
