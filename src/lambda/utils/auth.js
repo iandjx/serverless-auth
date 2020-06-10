@@ -15,8 +15,8 @@ const {
   HASURA_SECRET,
 } = require(`./config`);
 
-function authJwt(id) {
-  return sign({ user: { id } }, HASURA_SECRET);
+function authJwt(jwt) {
+  return sign(jwt, HASURA_SECRET);
 }
 
 // eslint-disable-next-line no-console
@@ -152,13 +152,11 @@ passport.use(
       },
       secretOrKey: HASURA_SECRET,
     },
-    async ({ user: { id } }, done) => {
+    async (req, done) => {
       try {
-        // Here you'd typically load an existing user
-        // and use their data to create the JWT.
-        const jwt = authJwt(id);
-
-        return done(null, { id, jwt });
+        const ijwt = authJwt(req);
+        const id = req.sub;
+        return done(null, { id, ijwt });
       } catch (error) {
         return done(error);
       }

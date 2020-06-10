@@ -31757,7 +31757,7 @@ app.use(passport.initialize());
 
 const handleCallback = () => (req, res) => {
   res.cookie(`jwt`, req.user.jwt, {
-    httpOnly: true,
+    httpOnly: false,
     COOKIE_SECURE
   }).redirect(`/`);
 };
@@ -31810,12 +31810,8 @@ const {
   HASURA_SECRET
 } = __webpack_require__(/*! ./config */ "./utils/config.js");
 
-function authJwt(id) {
-  return sign({
-    user: {
-      id
-    }
-  }, HASURA_SECRET);
+function authJwt(jwt) {
+  return sign(jwt, HASURA_SECRET);
 } // eslint-disable-next-line no-console
 
 
@@ -31940,18 +31936,13 @@ passport.use(new passportJwt.Strategy({
   },
 
   secretOrKey: HASURA_SECRET
-}, async ({
-  user: {
-    id
-  }
-}, done) => {
+}, async (req, done) => {
   try {
-    // Here you'd typically load an existing user
-    // and use their data to create the JWT.
-    const jwt = authJwt(id);
+    const ijwt = authJwt(req);
+    const id = req.sub;
     return done(null, {
       id,
-      jwt
+      ijwt
     });
   } catch (error) {
     return done(error);

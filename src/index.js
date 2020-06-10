@@ -10,8 +10,8 @@ import Repository from "./components/Repository";
 ReactDOM.render(
   <React.StrictMode>
     <CssBaseline />
-    {/* <App /> */}
-    <RepositoryList />
+    <App />
+    {/* <RepositoryList /> */}
     {/* <Repository /> */}
   </React.StrictMode>,
   document.getElementById("root")
