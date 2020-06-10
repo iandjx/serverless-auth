@@ -3,9 +3,7 @@ import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
-import RepositoryList from "./components/RepositoryList";
 import CssBaseline from "@material-ui/core/CssBaseline";
-import Repository from "./components/Repository";
 import { BrowserRouter } from "react-router-dom";
 import { RecoilRoot } from "recoil";
 
@@ -15,8 +13,6 @@ ReactDOM.render(
       <RecoilRoot>
         <CssBaseline />
         <App />
-        {/* <RepositoryList /> */}
-        {/* <Repository /> */}
       </RecoilRoot>
     </BrowserRouter>
   </React.StrictMode>,

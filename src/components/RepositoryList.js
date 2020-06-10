@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import Repository from "./Repository";
 import { useSetRecoilState, useRecoilState } from "recoil";
 import { currentUser, repositoryList } from "../store";
