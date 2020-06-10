@@ -31759,7 +31759,7 @@ const handleCallback = () => (req, res) => {
   res.cookie(`jwt`, req.user.jwt, {
     httpOnly: false,
     COOKIE_SECURE
-  }).redirect(`/`);
+  }).redirect(`/login`);
 };
 
 app.get(`${ENDPOINT}/auth/github`, passport.authenticate(`github`, {
@@ -31815,7 +31815,6 @@ function authJwt(jwt) {
 } // eslint-disable-next-line no-console
 
 
-console.log(`${BASE_URL}${ENDPOINT}/auth/github/callback`);
 passport.use(new GitHubStrategy({
   clientID: GITHUB_CLIENT_ID,
   clientSecret: GITHUB_CLIENT_SECRET,
@@ -31823,7 +31822,6 @@ passport.use(new GitHubStrategy({
   // eslint-disable-next-line comma-dangle
   scope: [`user:email`]
 }, async (accessToken, refreshToken, profile, done) => {
-  console.log(profile);
   fetch(`${HASURA_ENDPOINT}`, {
     method: "POST",
     headers: {
@@ -31846,8 +31844,6 @@ passport.use(new GitHubStrategy({
     })
   }) // eslint-disable-next-line arrow-parens
   .then(res => res.json()).then(res => {
-    console.log(res);
-
     if (res.data.users[0] !== undefined) {
       const claims = {
         sub: "" + res.data.users[0].id,
@@ -31863,8 +31859,6 @@ passport.use(new GitHubStrategy({
         userName: res.data.users[0].name
       }; // req.user = user;
 
-      console.log("jwt " + jwt);
-      console.log("user" + user);
       const id = user.id;
       return done(null, {
         id,
@@ -31903,7 +31897,6 @@ passport.use(new GitHubStrategy({
           variables
         })
       }).then(res => res.json()).then(res => {
-        console.log(res);
         const claims = {
           sub: "" + res.data.insert_users_one.id,
           "https://hasura.io/jwt/claims": {
@@ -31918,8 +31911,6 @@ passport.use(new GitHubStrategy({
           userName: res.data.insert_users_one.login
         }; // req.user = user;
 
-        console.log("jwt " + jwt);
-        console.log("user" + user);
         const id = user.id;
         return done(null, {
           id,

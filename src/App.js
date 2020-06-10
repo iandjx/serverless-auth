@@ -1,73 +1,65 @@
-import React, { useState, useEffect } from "react";
-import logo from "./logo.svg";
-import "./App.css";
+import React from "react";
+import { Switch, Route, Link } from "react-router-dom";
+import Auth from "./components/Auth";
 import RepositoryList from "./components/RepositoryList";
 
-function App() {
-  function eraseCookieFromAllPaths(name) {
-    // This function will attempt to remove a cookie from all paths.
-    var pathBits = window.location.pathname.split("/");
-    var pathCurrent = " path=";
-
-    // do a simple pathless delete first.
-    document.cookie = name + "=; expires=Thu, 01-Jan-1970 00:00:01 GMT;";
-
-    for (var i = 0; i < pathBits.length; i++) {
-      pathCurrent += (pathCurrent.substr(-1) !== "/" ? "/" : "") + pathBits[i];
-      document.cookie =
-        name + "=; expires=Thu, 01-Jan-1970 00:00:01 GMT;" + pathCurrent + ";";
-    }
-  }
-
-  const [currentUser, setCurrentUser] = useState({});
-
-  const endpoint =
-    process.env.NODE_ENV === "development" ? "/.netlify/functions" : "/api";
-
-  async function fetchProfile() {
-    await fetch(`${endpoint}/auth/status`).then((res) =>
-      res.json().then((res) => setCurrentUser(res))
-    );
-  }
-
-  // async function fetchLogout() {
-  //   await fetch("/.netlify/functions/auth/logout").then((res) => {
-  //     setCurrentUser({});
-  //   });
-  //   eraseCookieFromAllPaths("session");
-  // }
-
-  useEffect(() => {
-    fetchProfile();
-  }, []);
-
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        {currentUser && currentUser && currentUser.id ? (
-          <>
-            {console.log(JSON.stringify(currentUser))}
-            {/* <p>{currentUser}</p> */}
-            <p>Hello {currentUser.id.sub}</p>
-            <p>{JSON.stringify(currentUser)}</p>
-            {/* <div className="App-link" onClick={fetchLogout}>
-              Logout
-            </div> */}
-          </>
-        ) : (
-          <>
-            <img src={logo} className="App-logo" alt="logo" />
-            <p>Sample demo to show Netlify login with PassportJS</p>
-            <a
-              className="App-link"
-              href={`${endpoint}/auth/github?host=${window.location.origin}`}
-            >
-              Login with Github
-            </a>
-          </>
-        )}
-      </header>
-      <RepositoryList />
+    <div>
+      <ul>
+        <li>
+          <Link to="/">test</Link>
+        </li>
+        <li>
+          <Link to="/login">Auth</Link>
+        </li>
+        <li>
+          <Link to="/repositoryList">repo</Link>
+        </li>
+      </ul>
+
+      <hr />
+
+      {/*
+    A <Switch> looks through all its children <Route>
+    elements and renders the first one whose path
+    matches the current URL. Use a <Switch> any time
+    you have multiple routes, but you want only one
+    of them to render at a time
+  */}
+      <Switch>
+        <Route exact path="/">
+          <Home />
+        </Route>
+        <Route path="/login">
+          <Auth />
+        </Route>
+        <Route path="/repositoryList">
+          <RepositoryList />
+        </Route>
+      </Switch>
+    </div>
+  );
+};
+function Home() {
+  return (
+    <div>
+      <h2>Home</h2>
+    </div>
+  );
+}
+function About() {
+  return (
+    <div>
+      <h2>About</h2>
+    </div>
+  );
+}
+
+function Dashboard() {
+  return (
+    <div>
+      <h2>Dashboard</h2>
     </div>
   );
 }

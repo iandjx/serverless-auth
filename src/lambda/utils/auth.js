@@ -20,7 +20,6 @@ function authJwt(jwt) {
 }
 
 // eslint-disable-next-line no-console
-console.log(`${BASE_URL}${ENDPOINT}/auth/github/callback`);
 
 passport.use(
   new GitHubStrategy(
@@ -32,7 +31,6 @@ passport.use(
       scope: [`user:email`],
     },
     async (accessToken, refreshToken, profile, done) => {
-      console.log(profile);
       fetch(`${HASURA_ENDPOINT}`, {
         method: "POST",
         headers: {
@@ -57,7 +55,6 @@ passport.use(
         // eslint-disable-next-line arrow-parens
         .then((res) => res.json())
         .then((res) => {
-          console.log(res);
           if (res.data.users[0] !== undefined) {
             const claims = {
               sub: "" + res.data.users[0].id,
@@ -75,8 +72,7 @@ passport.use(
             };
 
             // req.user = user;
-            console.log("jwt " + jwt);
-            console.log("user" + user);
+
             const id = user.id;
             return done(null, { id, jwt });
           } else {
@@ -115,8 +111,6 @@ passport.use(
             })
               .then((res) => res.json())
               .then((res) => {
-                console.log(res);
-
                 const claims = {
                   sub: "" + res.data.insert_users_one.id,
                   "https://hasura.io/jwt/claims": {
@@ -132,8 +126,7 @@ passport.use(
                 };
 
                 // req.user = user;
-                console.log("jwt " + jwt);
-                console.log("user" + user);
+
                 const id = user.id;
                 return done(null, { id, jwt });
               });

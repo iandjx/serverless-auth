@@ -18,7 +18,7 @@ app.use(passport.initialize());
 const handleCallback = () => (req, res) => {
   res
     .cookie(`jwt`, req.user.jwt, { httpOnly: false, COOKIE_SECURE })
-    .redirect(`/`);
+    .redirect(`/login`);
 };
 
 app.get(
