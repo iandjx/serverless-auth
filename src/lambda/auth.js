@@ -5,6 +5,7 @@ const passport = require(`passport`);
 const serverless = require(`serverless-http`);
 
 require(`./utils/auth`);
+require(`isomorphic-fetch`);
 
 const { COOKIE_SECURE, ENDPOINT } = require(`./utils/config`);
 
@@ -21,6 +22,10 @@ const handleCallback = () => (req, res) => {
     .redirect(`/repositoryList`);
 };
 
+const handleAccesstokenFailure = () => (req, res) => {
+  res.redirect(`${ENDPOINT}/auth/github`);
+};
+
 app.get(
   `${ENDPOINT}/auth/github`,
   passport.authenticate(`github`, { session: false })
@@ -34,7 +39,31 @@ app.get(
 app.get(
   `${ENDPOINT}/auth/status`,
   passport.authenticate(`jwt`, { session: false }),
-  (req, res) => res.json({ id: req.user.id, username: req.user.username })
+  (req, res) => {
+    fetch("https://api.github.com/", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${req.user.accessToken}`,
+      },
+    }).then((response) => {
+      if (response.status !== 200) {
+        console.log("access token failure");
+        res.json({ token: false });
+      } else {
+        res.json({
+          id: req.user.id,
+          username: req.user.username,
+          access_token: req.user.accessToken,
+        });
+      }
+    });
+
+    //check if access token is still valid
+    //if valid just return access token
+    // if invalid refresh access token and refresh token
+    // st
+  }
 );
 
 module.exports.handler = serverless(app);

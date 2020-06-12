@@ -22552,6 +22552,118 @@ module.exports  = function(token, secretOrKey, options, callback) {
 
 /***/ }),
 
+/***/ "../../node_modules/passport-oauth2-refresh/lib/refresh.js":
+/*!**********************************************************************************************!*\
+  !*** /Users/iandjx/Code/serverless-auth/node_modules/passport-oauth2-refresh/lib/refresh.js ***!
+  \**********************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+const AuthTokenRefresh = {};
+
+AuthTokenRefresh._strategies = {};
+
+/**
+ * Register a passport strategy so it can refresh an access token,
+ * with optional `name`, overridding the strategy's default name.
+ *
+ * Examples:
+ *
+ *     refresh.use(strategy);
+ *     refresh.use('facebook', strategy);
+ *
+ * @param {String|Strategy} name
+ * @param {Strategy} passport strategy
+ */
+AuthTokenRefresh.use = function(name, strategy) {
+  if(arguments.length === 1) {
+    // Infer name from strategy
+    strategy = name;
+    name = strategy && strategy.name;
+  }
+
+  if(strategy == null) {
+    throw new Error('Cannot register: strategy is null');
+  }
+
+  if(!name) {
+    throw new Error('Cannot register: name must be specified, or strategy must include name');
+  }
+
+  if(!strategy._oauth2) {
+    throw new Error('Cannot register: not an OAuth2 strategy');
+  }
+
+  // Use the strategy's OAuth2 object, since it might have been overwritten.
+  // https://github.com/fiznool/passport-oauth2-refresh/issues/3
+  const OAuth2 = strategy._oauth2.constructor;
+
+  // Generate our own oauth2 object for use later.
+  // Use the strategy's _refreshURL, if defined,
+  // otherwise use the regular accessTokenUrl.
+  AuthTokenRefresh._strategies[name] = {
+    strategy: strategy,
+    refreshOAuth2: new OAuth2(
+      strategy._oauth2._clientId,
+      strategy._oauth2._clientSecret,
+      strategy._oauth2._baseSite,
+      strategy._oauth2._authorizeUrl,
+      strategy._refreshURL || strategy._oauth2._accessTokenUrl,
+      strategy._oauth2._customHeaders)
+  };
+
+  // Some strategies overwrite the getOAuthAccessToken function to set headers
+  // https://github.com/fiznool/passport-oauth2-refresh/issues/10
+  AuthTokenRefresh._strategies[name].refreshOAuth2.getOAuthAccessToken = strategy._oauth2.getOAuthAccessToken;
+};
+
+/**
+ * Check if a strategy is registered for refreshing.
+ * @param  {String}  name Strategy name
+ * @return {Boolean}
+ */
+AuthTokenRefresh.has = function(name) {
+  return !!AuthTokenRefresh._strategies[name];
+};
+
+/**
+ * Request a new access token, using the passed refreshToken,
+ * for the given strategy.
+ * @param  {String}   name         Strategy name. Must have already
+ *                                 been registered.
+ * @param  {String}   refreshToken Refresh token to be sent to request
+ *                                 a new access token.
+ * @param  {Object}   params       (optional) an object containing additional
+ *                                 params to use when requesting the token.
+ * @param  {Function} done         Callback when all is done.
+ */
+AuthTokenRefresh.requestNewAccessToken = function(name, refreshToken, params, done) {
+  if(arguments.length === 3) {
+    done = params;
+    params = {};
+  }
+
+  // Send a request to refresh an access token, and call the passed
+  // callback with the result.
+  const strategy = AuthTokenRefresh._strategies[name];
+  if(!strategy) {
+    return done(new Error('Strategy was not registered to refresh a token'));
+  }
+
+  params = params || {};
+  params.grant_type = 'refresh_token';
+
+  strategy.refreshOAuth2.getOAuthAccessToken(refreshToken, params, done);
+};
+
+module.exports = AuthTokenRefresh;
+
+
+/***/ }),
+
 /***/ "../../node_modules/passport-oauth2/lib/errors/authorizationerror.js":
 /*!********************************************************************************************************!*\
   !*** /Users/iandjx/Code/serverless-auth/node_modules/passport-oauth2/lib/errors/authorizationerror.js ***!
@@ -31742,6 +31854,8 @@ const serverless = __webpack_require__(/*! serverless-http */ "../../node_module
 
 __webpack_require__(/*! ./utils/auth */ "./utils/auth.js");
 
+__webpack_require__(/*! isomorphic-fetch */ "../../node_modules/isomorphic-fetch/fetch-npm-node.js");
+
 const {
   COOKIE_SECURE,
   ENDPOINT
@@ -31762,6 +31876,10 @@ const handleCallback = () => (req, res) => {
   }).redirect(`/repositoryList`);
 };
 
+const handleAccesstokenFailure = () => (req, res) => {
+  res.redirect(`${ENDPOINT}/auth/github`);
+};
+
 app.get(`${ENDPOINT}/auth/github`, passport.authenticate(`github`, {
   session: false
 }));
@@ -31771,10 +31889,31 @@ app.get(`${ENDPOINT}/auth/github/callback`, passport.authenticate(`github`, {
 }), handleCallback());
 app.get(`${ENDPOINT}/auth/status`, passport.authenticate(`jwt`, {
   session: false
-}), (req, res) => res.json({
-  id: req.user.id,
-  username: req.user.username
-}));
+}), (req, res) => {
+  fetch("https://api.github.com/", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${req.user.accessToken}`
+    }
+  }).then(response => {
+    if (response.status !== 200) {
+      console.log("access token failure");
+      res.json({
+        token: false
+      });
+    } else {
+      res.json({
+        id: req.user.id,
+        username: req.user.username,
+        access_token: req.user.accessToken
+      });
+    }
+  }); //check if access token is still valid
+  //if valid just return access token
+  // if invalid refresh access token and refresh token
+  // st
+});
 module.exports.handler = serverless(app);
 
 /***/ }),
@@ -31790,13 +31929,13 @@ const {
   sign
 } = __webpack_require__(/*! jsonwebtoken */ "../../node_modules/jsonwebtoken/index.js");
 
-const {
-  Strategy: GitHubStrategy
-} = __webpack_require__(/*! passport-github2 */ "../../node_modules/passport-github2/lib/index.js");
+const GitHubStrategy = __webpack_require__(/*! passport-github2 */ "../../node_modules/passport-github2/lib/index.js").Strategy;
 
 const passport = __webpack_require__(/*! passport */ "../../node_modules/passport/lib/index.js");
 
 const passportJwt = __webpack_require__(/*! passport-jwt */ "../../node_modules/passport-jwt/lib/index.js");
+
+const refresh = __webpack_require__(/*! passport-oauth2-refresh */ "../../node_modules/passport-oauth2-refresh/lib/refresh.js");
 
 __webpack_require__(/*! isomorphic-fetch */ "../../node_modules/isomorphic-fetch/fetch-npm-node.js");
 
@@ -31805,7 +31944,6 @@ const {
   ENDPOINT,
   GITHUB_CLIENT_ID,
   GITHUB_CLIENT_SECRET,
-  SECRET,
   HASURA_ENDPOINT,
   // eslint-disable-next-line comma-dangle
   HASURA_SECRET
@@ -31816,12 +31954,12 @@ function authJwt(jwt) {
 } // eslint-disable-next-line no-console
 
 
-passport.use(new GitHubStrategy({
+const strategy = new GitHubStrategy({
   clientID: GITHUB_CLIENT_ID,
   clientSecret: GITHUB_CLIENT_SECRET,
   callbackURL: `${BASE_URL}${ENDPOINT}/auth/github/callback`,
   // eslint-disable-next-line comma-dangle
-  scope: [`user:email`]
+  scope: ["profile", "repo"]
 }, async (accessToken, refreshToken, profile, done) => {
   fetch(`${HASURA_ENDPOINT}`, {
     method: "POST",
@@ -31849,10 +31987,12 @@ passport.use(new GitHubStrategy({
       const claims = {
         sub: "" + res.data.users[0].id,
         login: "" + profile._json.login,
+        access_token: accessToken,
+        refresh_token: refreshToken,
         "https://hasura.io/jwt/claims": {
-          "x-hasura-default-role": "admin",
+          "x-hasura-default-role": "user",
           "x-hasura-user-id": "" + res.data.users[0].id,
-          "x-hasura-allowed-roles": ["admin", "user"]
+          "x-hasura-allowed-roles": ["user"]
         }
       };
       const jwt = authJwt(claims);
@@ -31866,6 +32006,8 @@ passport.use(new GitHubStrategy({
       return done(null, {
         id,
         username,
+        accessToken,
+        refreshToken,
         jwt
       });
     } else {
@@ -31904,10 +32046,12 @@ passport.use(new GitHubStrategy({
         const claims = {
           sub: "" + res.data.insert_users_one.id,
           login: "" + profile._json.login,
+          access_token: accessToken,
+          refresh_token: refreshToken,
           "https://hasura.io/jwt/claims": {
-            "x-hasura-default-role": "admin",
+            "x-hasura-default-role": "user",
             "x-hasura-user-id": "" + res.data.insert_users_one.id,
-            "x-hasura-allowed-roles": ["admin", "user"]
+            "x-hasura-allowed-roles": ["user"]
           }
         };
         const jwt = authJwt(claims);
@@ -31921,12 +32065,16 @@ passport.use(new GitHubStrategy({
         return done(null, {
           id,
           username,
+          accessToken,
+          refreshToken,
           jwt
         });
       });
     }
   });
-}));
+});
+passport.use(strategy);
+refresh.use(strategy);
 passport.use(new passportJwt.Strategy({
   jwtFromRequest(req) {
     if (!req.cookies) throw new Error(`Missing cookie-parser middleware`);
@@ -31936,13 +32084,16 @@ passport.use(new passportJwt.Strategy({
   secretOrKey: HASURA_SECRET
 }, async (req, done) => {
   try {
-    console.log(req);
     const ijwt = authJwt(req);
     const id = req.sub;
     const username = req.login;
+    const accessToken = req.access_token;
+    const refreshToken = req.refresh_token;
     return done(null, {
       id,
       username,
+      accessToken,
+      refreshToken,
       ijwt
     });
   } catch (error) {
