@@ -1,5 +1,5 @@
 const { sign } = require(`jsonwebtoken`);
-const GitHubStrategy = require(`passport-github2`).Strategy;
+const GitHubStrategy = require(`passport-github`).Strategy;
 const passport = require(`passport`);
 const passportJwt = require(`passport-jwt`);
 const refresh = require("passport-oauth2-refresh");
@@ -27,8 +27,7 @@ const strategy = new GitHubStrategy(
     clientID: GITHUB_CLIENT_ID,
     clientSecret: GITHUB_CLIENT_SECRET,
     callbackURL: `${BASE_URL}${ENDPOINT}/auth/github/callback`,
-    // eslint-disable-next-line comma-dangle
-    scope: ["profile", "repo"],
+    scope: ["public_repo", "user"],
   },
   async (accessToken, refreshToken, profile, done) => {
     fetch(`${HASURA_ENDPOINT}`, {

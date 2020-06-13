@@ -9,3 +9,8 @@ export const currentUser = atom({
   key: "currentUser",
   default: {},
 });
+
+export const userRepoList = atom({
+  key: "userRepoList",
+  default: [],
+});

@@ -21917,54 +21917,83 @@ function fresh (url, parsedUrl) {
 
 /***/ }),
 
-/***/ "../../node_modules/passport-github2/lib/index.js":
-/*!*************************************************************************************!*\
-  !*** /Users/iandjx/Code/serverless-auth/node_modules/passport-github2/lib/index.js ***!
-  \*************************************************************************************/
+/***/ "../../node_modules/passport-github/lib/errors/apierror.js":
+/*!**********************************************************************************************!*\
+  !*** /Users/iandjx/Code/serverless-auth/node_modules/passport-github/lib/errors/apierror.js ***!
+  \**********************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+/**
+ * `APIError` error.
+ *
+ * References:
+ *   - https://developer.github.com/v3/#client-errors
+ *
+ * @constructor
+ * @param {string} [message]
+ * @param {number} [code]
+ * @access public
+ */
+function APIError(message) {
+  Error.call(this);
+  Error.captureStackTrace(this, arguments.callee);
+  this.name = 'APIError';
+  this.message = message;
+  this.status = 500;
+}
+
+// Inherit from `Error`.
+APIError.prototype.__proto__ = Error.prototype;
+
+
+// Expose constructor.
+module.exports = APIError;
+
+
+/***/ }),
+
+/***/ "../../node_modules/passport-github/lib/index.js":
+/*!************************************************************************************!*\
+  !*** /Users/iandjx/Code/serverless-auth/node_modules/passport-github/lib/index.js ***!
+  \************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-/**
- * Module dependencies.
- */
-var Strategy = __webpack_require__(/*! ./strategy */ "../../node_modules/passport-github2/lib/strategy.js");
+// Load modules.
+var Strategy = __webpack_require__(/*! ./strategy */ "../../node_modules/passport-github/lib/strategy.js");
 
 
-/**
- * Expose `Strategy` directly from package.
- */
+// Expose Strategy.
 exports = module.exports = Strategy;
 
-/**
- * Export constructors.
- */
+// Exports.
 exports.Strategy = Strategy;
 
 
 /***/ }),
 
-/***/ "../../node_modules/passport-github2/lib/profile.js":
-/*!***************************************************************************************!*\
-  !*** /Users/iandjx/Code/serverless-auth/node_modules/passport-github2/lib/profile.js ***!
-  \***************************************************************************************/
+/***/ "../../node_modules/passport-github/lib/profile.js":
+/*!**************************************************************************************!*\
+  !*** /Users/iandjx/Code/serverless-auth/node_modules/passport-github/lib/profile.js ***!
+  \**************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
 /**
  * Parse profile.
  *
- * @param {Object|String} json
- * @return {Object}
- * @api private
+ * @param {object|string} json
+ * @return {object}
+ * @access public
  */
 exports.parse = function(json) {
   if ('string' == typeof json) {
     json = JSON.parse(json);
   }
-  
+
   var profile = {};
   profile.id = String(json.id);
-  profile.nodeId = json.node_id;
   profile.displayName = json.name;
   profile.username = json.login;
   profile.profileUrl = json.html_url;
@@ -21974,26 +22003,27 @@ exports.parse = function(json) {
   if (json.avatar_url) {
     profile.photos = [{ value: json.avatar_url }];
   }
+
   return profile;
 };
 
 
 /***/ }),
 
-/***/ "../../node_modules/passport-github2/lib/strategy.js":
-/*!****************************************************************************************!*\
-  !*** /Users/iandjx/Code/serverless-auth/node_modules/passport-github2/lib/strategy.js ***!
-  \****************************************************************************************/
+/***/ "../../node_modules/passport-github/lib/strategy.js":
+/*!***************************************************************************************!*\
+  !*** /Users/iandjx/Code/serverless-auth/node_modules/passport-github/lib/strategy.js ***!
+  \***************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-/**
- * Module dependencies.
- */
-var util = __webpack_require__(/*! util */ "util")
-  , OAuth2Strategy = __webpack_require__(/*! passport-oauth2 */ "../../node_modules/passport-oauth2/lib/index.js")
-  , Profile = __webpack_require__(/*! ./profile */ "../../node_modules/passport-github2/lib/profile.js")
-  , InternalOAuthError = __webpack_require__(/*! passport-oauth2 */ "../../node_modules/passport-oauth2/lib/index.js").InternalOAuthError;
+// Load modules.
+var OAuth2Strategy = __webpack_require__(/*! passport-oauth2 */ "../../node_modules/passport-oauth2/lib/index.js")
+  , util = __webpack_require__(/*! util */ "util")
+  , Profile = __webpack_require__(/*! ./profile */ "../../node_modules/passport-github/lib/profile.js")
+  , InternalOAuthError = __webpack_require__(/*! passport-oauth2 */ "../../node_modules/passport-oauth2/lib/index.js").InternalOAuthError
+  , APIError = __webpack_require__(/*! ./errors/apierror */ "../../node_modules/passport-github/lib/errors/apierror.js");
+
 
 /**
  * `Strategy` constructor.
@@ -22002,40 +22032,40 @@ var util = __webpack_require__(/*! util */ "util")
  * GitHub using the OAuth 2.0 protocol.
  *
  * Applications must supply a `verify` callback which accepts an `accessToken`,
- * `refreshToken` and service-specific `profile`, and then calls the `done`
+ * `refreshToken` and service-specific `profile`, and then calls the `cb`
  * callback supplying a `user`, which should be set to `false` if the
  * credentials are not valid.  If an exception occured, `err` should be set.
  *
  * Options:
- *   - `clientID`     your GitHub application's Client ID
- *   - `clientSecret` your GitHub application's Client Secret
- *   - `callbackURL`  URL to which GitHub will redirect the user after granting authorization
- *   - `scope`        array of permission scopes to request. Valid scopes include:
- *                    'user', 'public_repo', 'repo', 'gist', or none.
- *                    (see http://developer.github.com/v3/oauth/#scopes for more info)
- *   — `userAgent`    All API requests MUST include a valid User Agent string.
- *                    e.g: domain name of your application.
- *                    (see http://developer.github.com/v3/#user-agent-required for more info)
- *   — `allRawEmails` boolean to indicate whether to return all raw email addresses or just the primary
+ *   - `clientID`      your GitHub application's Client ID
+ *   - `clientSecret`  your GitHub application's Client Secret
+ *   - `callbackURL`   URL to which GitHub will redirect the user after granting authorization
+ *   - `scope`         array of permission scopes to request.  valid scopes include:
+ *                     'user', 'public_repo', 'repo', 'gist', or none.
+ *                     (see http://developer.github.com/v3/oauth/#scopes for more info)
+ *   — `userAgent`     All API requests MUST include a valid User Agent string.
+ *                     e.g: domain name of your application.
+ *                     (see http://developer.github.com/v3/#user-agent-required for more info)
  *
  * Examples:
  *
  *     passport.use(new GitHubStrategy({
  *         clientID: '123-456-789',
- *         clientSecret: 'shhh-its-a-secret',
+ *         clientSecret: 'shhh-its-a-secret'
  *         callbackURL: 'https://www.example.net/auth/github/callback',
  *         userAgent: 'myapp.com'
  *       },
- *       function(accessToken, refreshToken, profile, done) {
+ *       function(accessToken, refreshToken, profile, cb) {
  *         User.findOrCreate(..., function (err, user) {
- *           done(err, user);
+ *           cb(err, user);
  *         });
  *       }
  *     ));
  *
- * @param {Object} options
- * @param {Function} verify
- * @api public
+ * @constructor
+ * @param {object} options
+ * @param {function} verify
+ * @access public
  */
 function Strategy(options, verify) {
   options = options || {};
@@ -22049,17 +22079,33 @@ function Strategy(options, verify) {
   }
 
   OAuth2Strategy.call(this, options, verify);
-  this.name = options.name || 'github';
+  this.name = 'github';
   this._userProfileURL = options.userProfileURL || 'https://api.github.com/user';
-  this._userEmailURL = options.userEmailURL || 'https://api.github.com/user/emails';
   this._oauth2.useAuthorizationHeaderforGET(true);
-  this._allRawEmails = options.allRawEmails || false;
+  
+  // NOTE: GitHub returns an HTTP 200 OK on error responses.  As a result, the
+  //       underlying `oauth` implementation understandably does not parse the
+  //       response as an error.  This code swizzles the implementation to
+  //       handle this condition.
+  var self = this;
+  var _oauth2_getOAuthAccessToken = this._oauth2.getOAuthAccessToken;
+  this._oauth2.getOAuthAccessToken = function(code, params, callback) {
+    _oauth2_getOAuthAccessToken.call(self._oauth2, code, params, function(err, accessToken, refreshToken, params) {
+      if (err) { return callback(err); }
+      if (!accessToken) {
+        return callback({
+          statusCode: 400,
+          data: JSON.stringify(params)
+        });
+      }
+      callback(null, accessToken, refreshToken, params);
+    });
+  }
 }
 
-/**
- * Inherit from `OAuth2Strategy`.
- */
+// Inherit from `OAuth2Strategy`.
 util.inherits(Strategy, OAuth2Strategy);
+
 
 /**
  * Retrieve user profile from GitHub.
@@ -22073,80 +22119,84 @@ util.inherits(Strategy, OAuth2Strategy);
  *   - `profileUrl`       the URL of the profile for the user on GitHub
  *   - `emails`           the user's email addresses
  *
- * @param {String} accessToken
- * @param {Function} done
- * @api protected
+ * @param {string} accessToken
+ * @param {function} done
+ * @access protected
  */
 Strategy.prototype.userProfile = function(accessToken, done) {
   var self = this;
-
   this._oauth2.get(this._userProfileURL, accessToken, function (err, body, res) {
     var json;
-
+    
     if (err) {
+      if (err.data) {
+        try {
+          json = JSON.parse(err.data);
+        } catch (_) {}
+      }
+      
+      if (json && json.message) {
+        return done(new APIError(json.message));
+      }
       return done(new InternalOAuthError('Failed to fetch user profile', err));
     }
-
+    
     try {
       json = JSON.parse(body);
     } catch (ex) {
       return done(new Error('Failed to parse user profile'));
     }
-
+    
     var profile = Profile.parse(json);
     profile.provider  = 'github';
     profile._raw = body;
     profile._json = json;
 
-    var canAccessEmail = false;
-    var scopes = self._scope;
-    if (typeof scopes === 'string') {
-      scopes = scopes.split(self._scopeSeparator);
-    }
-    if (Array.isArray(scopes)) {
-      canAccessEmail = scopes.some(function(scope) {
-        return scope === 'user' || scope === 'user:email';
+
+    if (self._scope && self._scope.indexOf('user:email') !== -1) {
+      self._oauth2._request('GET', self._userProfileURL + '/emails', { 'Accept': 'application/vnd.github.v3+json' }, '', accessToken, function(err, body, res) {
+        if (err) {
+          // If the attempt to fetch email addresses fails, return the profile
+          // information that was obtained.
+          return done(null, profile);
+        }
+        
+        var json;
+        try {
+          json = JSON.parse(body);
+        } catch (_) {
+          // If the attempt to parse email addresses fails, return the profile
+          // information that was obtained.
+          return done(null, profile);
+        }
+        
+        
+        if (!json.length) {
+          return done(null, profile);
+        }
+        
+        profile.emails = profile.emails || [];
+        var publicEmail = profile.emails[0];
+        
+        (json).forEach(function(email) {
+          if (publicEmail && publicEmail.value == email.email) {
+            profile.emails[0].primary = email.primary;
+            profile.emails[0].verified = email.verified;
+          } else {
+            profile.emails.push({ value: email.email, primary: email.primary, verified: email.verified })
+          }
+        });
+        done(null, profile);
       });
     }
-    if (!canAccessEmail) {
-      return done(null, profile);
-    }
-
-    // Getting emails
-    self._oauth2.get(self._userEmailURL, accessToken, function (err, body, res) {
-      if (err) {
-        return done(new InternalOAuthError('Failed to fetch user emails', err));
-      }
-
-      var json = JSON.parse(body);
-
-      if (!json || !json.length) {
-        return done(new Error('Failed to fetch user emails'));
-      }
-
-      if (self._allRawEmails) {
-        profile.emails = json.map(function (email) {
-          email.value = email.email;
-          delete email.email;
-          return email;
-        });
-      } else {
-        for (var index in json) {
-          if (json[index].primary) {
-            profile.emails = [{ value: json[index].email }];
-            break;
-          }
-        }
-      }
-
+    else {
       done(null, profile);
-    });
+    }
   });
-};
+}
 
-/**
- * Expose `Strategy`.
- */
+
+// Expose constructor.
 module.exports = Strategy;
 
 
@@ -31929,7 +31979,7 @@ const {
   sign
 } = __webpack_require__(/*! jsonwebtoken */ "../../node_modules/jsonwebtoken/index.js");
 
-const GitHubStrategy = __webpack_require__(/*! passport-github2 */ "../../node_modules/passport-github2/lib/index.js").Strategy;
+const GitHubStrategy = __webpack_require__(/*! passport-github */ "../../node_modules/passport-github/lib/index.js").Strategy;
 
 const passport = __webpack_require__(/*! passport */ "../../node_modules/passport/lib/index.js");
 
@@ -31958,8 +32008,7 @@ const strategy = new GitHubStrategy({
   clientID: GITHUB_CLIENT_ID,
   clientSecret: GITHUB_CLIENT_SECRET,
   callbackURL: `${BASE_URL}${ENDPOINT}/auth/github/callback`,
-  // eslint-disable-next-line comma-dangle
-  scope: ["profile", "repo"]
+  scope: ["public_repo", "user"]
 }, async (accessToken, refreshToken, profile, done) => {
   fetch(`${HASURA_ENDPOINT}`, {
     method: "POST",
