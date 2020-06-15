@@ -4,6 +4,16 @@ import { useSetRecoilState, useRecoilState } from "recoil";
 import { currentUser, repositoryList, userRepoList } from "../store";
 import TextField from "@material-ui/core/TextField";
 import { GraphQLClient } from "graphql-request";
+import { useSubscriptions, useSubscription } from "graphql-hooks";
+
+const TOPIC_SUBSCRIPTION = `
+    subscription MySubscription {
+    topics {
+      id
+      name
+    }
+  }
+  `;
 
 const query = `{
     viewer {
@@ -26,6 +36,21 @@ function getCookieValue(a) {
 }
 const jwt = getCookieValue("jwt");
 const AddRepository = () => {
+  const [topic, setTopic] = useState([]);
+  const [error, setError] = useState(null);
+
+  const topic1 = useSubscription(
+    { query: TOPIC_SUBSCRIPTION },
+    ({ data, errors }) => {
+      if (errors && errors.length > 0) {
+        // handle your errors
+        setError(errors[0]);
+        return;
+      }
+      setTopic([...data]);
+    }
+  );
+
   const user = useRecoilState(currentUser);
   const [repoSearchString, setRepoSearchString] = useState("");
   const setUserRepoList = useSetRecoilState(userRepoList);
@@ -93,6 +118,7 @@ const AddRepository = () => {
         })
         .catch((error) => console.log(error));
     };
+
     fetchData();
   }, []);
   return (
@@ -116,11 +142,18 @@ const AddRepository = () => {
       {console.log(userRepositoryList)}
       {userRepositoryList[0].search !== undefined ? (
         userRepositoryList[0].search.edges.map((node) => (
-          <p key={node.node.id}>{node.node.name}</p>
+          <React.Fragment>
+            <p key={node.node.id}>{node.node.name}</p>
+            <Button onClick={() => console.log(node.node.name)}>
+              {" "}
+              Connect
+            </Button>
+          </React.Fragment>
         ))
       ) : (
         <div />
       )}
+      {console.log(topic)}
     </div>
   );
 };

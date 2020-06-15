@@ -2,6 +2,7 @@ import React from "react";
 import { Switch, Route, Link } from "react-router-dom";
 import RepositoryList from "./components/RepositoryList";
 import AddRepository from "./components/AddRepository";
+import { Hasura } from "./components/Hasura";
 const endpoint =
   process.env.NODE_ENV === "development" ? "/.netlify/functions" : "/api";
 
@@ -23,6 +24,9 @@ const App = () => {
         <li>
           <Link to="/addRepo">Add Repository</Link>
         </li>
+        <li>
+          <Link to="/hasura">Add Repository</Link>
+        </li>
       </ul>
 
       <hr />
@@ -36,6 +40,9 @@ const App = () => {
         </Route>
         <Route path="/addRepo">
           <AddRepository />
+        </Route>
+        <Route path="/hasura">
+          <Hasura />
         </Route>
       </Switch>
     </div>
