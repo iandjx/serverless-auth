@@ -4,88 +4,23 @@ import { useSetRecoilState, useRecoilState } from "recoil";
 import { currentUser, repositoryList, userRepoList } from "../store";
 import TextField from "@material-ui/core/TextField";
 import { GraphQLClient } from "graphql-request";
-import { useSubscriptions, useSubscription } from "graphql-hooks";
+import {
+  repoSearchQuery,
+  fetchAllTopics,
+  createNewRepo,
+  insertNewTopic,
+  addREpoTopics,
+} from "../queries/index";
+import { useQuery, useMutation } from "graphql-hooks";
 
-const TOPIC_SUBSCRIPTION = `
-    subscription MySubscription {
-    topics {
-      id
-      name
-    }
-  }
-  `;
-
-const query = `{
-    viewer {
-      repositories(last: 10) {
-        nodes {
-          nameWithOwner
-          owner {
-            login
-          }
-        }
-      }
-    }
-  }
-  `;
 const endpoint = `https://api.github.com/graphql`;
 
-function getCookieValue(a) {
-  var b = document.cookie.match("(^|;)\\s*" + a + "\\s*=\\s*([^;]+)");
-  return b ? b.pop() : "";
-}
-const jwt = getCookieValue("jwt");
 const AddRepository = () => {
-  const [topic, setTopic] = useState([]);
-  const [error, setError] = useState(null);
-
-  const topic1 = useSubscription(
-    { query: TOPIC_SUBSCRIPTION },
-    ({ data, errors }) => {
-      if (errors && errors.length > 0) {
-        // handle your errors
-        setError(errors[0]);
-        return;
-      }
-      setTopic([...data]);
-    }
-  );
-
   const user = useRecoilState(currentUser);
   const [repoSearchString, setRepoSearchString] = useState("");
+  const [topicList, setTopicList] = useState([]);
   const setUserRepoList = useSetRecoilState(userRepoList);
   const userRepositoryList = useRecoilState(userRepoList);
-  const searchQuery = `{
-    search(query: " ${repoSearchString} user:iandjx", type: REPOSITORY, first: 50) {
-      edges {
-        node {
-          ... on Repository {
-            name
-            repositoryTopics(first: 10) {
-              nodes {
-                topic {
-                  name
-                }
-              }
-            }
-            owner {
-              login
-              url
-              id
-            }
-            languages(first: 10) {
-              nodes {
-                name
-              }
-            }
-            description
-            id
-          }
-        }
-      }
-    }
-  }
-  `;
 
   const graphQLClient = new GraphQLClient(endpoint, {
     headers: {
@@ -93,38 +28,67 @@ const AddRepository = () => {
     },
   });
 
-  console.log(JSON.stringify(graphQLClient));
+  const { loading, data, error } = useQuery(fetchAllTopics);
+
   const handleClick = async () => {
-    const data = await graphQLClient.request(searchQuery);
-    console.log(data);
+    const variables = {
+      search_string: repoSearchString + ` user:${user[0].username}`,
+    };
+    const data = await graphQLClient.request(repoSearchQuery, variables);
     setUserRepoList(data);
   };
-  useEffect(() => {
-    console.log(user[0].access_token);
-    const fetchData = async () => {
-      fetch("https://api.github.com/graphql", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user[0].access_token}`,
-        },
-        body: JSON.stringify({
-          query: query,
-        }),
-      })
-        .then((response) => response.json())
-        .then((response) => {
-          console.log(response);
-        })
-        .catch((error) => console.log(error));
-    };
+  const [addNewRepo] = useMutation(createNewRepo);
+  const [addNewTopics] = useMutation(insertNewTopic);
+  const [linkRepoTopic] = useMutation(addREpoTopics);
+  const insertRepository = (repo) => {
+    //compare exising topics from current repo
+    const repoTopics = repo.repositoryTopics.nodes.reduce((acc, node) => {
+      acc.push({ id: node.topic.id, name: node.topic.name });
+      return acc;
+    }, []);
 
-    fetchData();
-  }, []);
+    const existingTopics = repoTopics.filter((topic) =>
+      topicList.topics.some((htopic) => htopic.id === topic.id)
+    );
+    let topicsToInsert;
+    if (existingTopics.length === 0) {
+      topicsToInsert = [...repoTopics];
+    } else {
+      topicsToInsert = repoTopics.filter((topic) =>
+        existingTopics.some((etopic) => etopic.id !== topic.id)
+      );
+    }
+
+    //add new repo
+    addNewRepo({
+      variables: {
+        description: repo.description,
+        id: repo.id,
+        language: repo.primaryLanguage.name,
+        name: repo.name,
+        owner: repo.owner.login,
+        owner_id: user[0].id,
+        owner_node_id: repo.owner.id,
+        url: repo.url,
+      },
+    });
+
+    if (topicsToInsert.length > 0) {
+      addNewTopics({ variables: { objects: [...topicsToInsert] } });
+    }
+    const repoTopicVariables = repoTopics.map((topic) => {
+      return { repository_id: repo.id, topic_id: topic.id };
+    });
+
+    linkRepoTopic({ variables: { objects: [...repoTopicVariables] } });
+  };
+
+  useEffect(() => {
+    setTopicList(data);
+  }, [data]);
   return (
     <div>
-      {/* {userRepositoryList[0].search &&
-        console.log(userRepositoryList[0].search.edges[0].node.name)} */}
+      {data && <p>{JSON.stringify(data)}</p>}
       <TextField
         id="standard-basic"
         value={repoSearchString}
@@ -139,21 +103,17 @@ const AddRepository = () => {
       >
         Search
       </Button>
-      {console.log(userRepositoryList)}
+
       {userRepositoryList[0].search !== undefined ? (
-        userRepositoryList[0].search.edges.map((node) => (
+        userRepositoryList[0].search.edges.map((repo) => (
           <React.Fragment>
-            <p key={node.node.id}>{node.node.name}</p>
-            <Button onClick={() => console.log(node.node.name)}>
-              {" "}
-              Connect
-            </Button>
+            <p key={repo.node.id}>{repo.node.name}</p>
+            <Button onClick={() => insertRepository(repo.node)}>Connect</Button>
           </React.Fragment>
         ))
       ) : (
         <div />
       )}
-      {console.log(topic)}
     </div>
   );
 };

@@ -56,7 +56,6 @@ const RepositoryList = () => {
   }, []);
   return (
     <div>
-      {console.log(user)}
       {projectList[0] &&
         projectList[0].map((project) => (
           <React.Fragment key={project.id}>

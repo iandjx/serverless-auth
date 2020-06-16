@@ -1,7 +1,3 @@
-// query MyQuery {
-//     __typename
-//   }
-
 //   mutation MyMutation($objects: [repo_topic_insert_input!]!) {
 //     insert_repo_topic(objects: $objects) {
 //       affected_rows

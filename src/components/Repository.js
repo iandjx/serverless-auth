@@ -25,11 +25,15 @@ const useStyles = makeStyles({
 const Repository = (props) => {
   const { project } = props;
   const classes = useStyles();
-
+  console.log(project);
   return (
     <Card className={classes.root}>
       <CardContent>
-        <Typography variant="h5" component="h2">
+        <Typography
+          variant="h5"
+          component="h2"
+          onClick={() => console.log(project.url)}
+        >
           {project.owner} / {project.name}
         </Typography>
         <Typography className={classes.pos} color="textSecondary">
