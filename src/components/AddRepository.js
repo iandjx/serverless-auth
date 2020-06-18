@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@material-ui/core";
 import { useSetRecoilState, useRecoilState } from "recoil";
-import { currentUser, repositoryList, userRepoList } from "../store";
+import { currentUser, userRepoList, hasuraTopicList } from "../store";
 import TextField from "@material-ui/core/TextField";
 import { GraphQLClient } from "graphql-request";
 import {
@@ -18,7 +18,8 @@ const endpoint = `https://api.github.com/graphql`;
 const AddRepository = () => {
   const user = useRecoilState(currentUser);
   const [repoSearchString, setRepoSearchString] = useState("");
-  const [topicList, setTopicList] = useState([]);
+  const topicList = useRecoilState(hasuraTopicList);
+  const setTopicList = useSetRecoilState(hasuraTopicList);
   const setUserRepoList = useSetRecoilState(userRepoList);
   const userRepositoryList = useRecoilState(userRepoList);
 
@@ -37,9 +38,11 @@ const AddRepository = () => {
     const data = await graphQLClient.request(repoSearchQuery, variables);
     setUserRepoList(data);
   };
+
   const [addNewRepo] = useMutation(createNewRepo);
   const [addNewTopics] = useMutation(insertNewTopic);
   const [linkRepoTopic] = useMutation(addREpoTopics);
+
   const insertRepository = (repo) => {
     //compare exising topics from current repo
     const repoTopics = repo.repositoryTopics.nodes.reduce((acc, node) => {
@@ -48,7 +51,7 @@ const AddRepository = () => {
     }, []);
 
     const existingTopics = repoTopics.filter((topic) =>
-      topicList.topics.some((htopic) => htopic.id === topic.id)
+      topicList[0].topics.some((htopic) => htopic.id === topic.id)
     );
     let topicsToInsert;
     if (existingTopics.length === 0) {
@@ -65,7 +68,7 @@ const AddRepository = () => {
         description: repo.description,
         id: repo.id,
         language: repo.primaryLanguage.name,
-        name: repo.name,
+        name: repo.name.toLowerCase(),
         owner: repo.owner.login,
         owner_id: user[0].id,
         owner_node_id: repo.owner.id,

@@ -4,4 +4,7 @@ export {
   createNewRepo,
   insertNewTopic,
   addREpoTopics,
+  searchRepos,
+  searchReposWithTag,
+  fetchAllRepos,
 } from "./hasura";

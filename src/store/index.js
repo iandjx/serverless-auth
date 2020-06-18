@@ -1,1 +1,6 @@
-export { currentUser, repositoryList, userRepoList } from "./atom";
+export {
+  currentUser,
+  repositoryList,
+  userRepoList,
+  hasuraTopicList,
+} from "./atom";

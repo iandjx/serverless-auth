@@ -14,3 +14,8 @@ export const userRepoList = atom({
   key: "userRepoList",
   default: [],
 });
+
+export const hasuraTopicList = atom({
+  key: "hasuraTopicList",
+  default: [],
+});
