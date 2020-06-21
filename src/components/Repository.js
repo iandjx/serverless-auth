@@ -25,7 +25,6 @@ const useStyles = makeStyles({
 const Repository = (props) => {
   const { project } = props;
   const classes = useStyles();
-  console.log(project);
   return (
     <Card className={classes.root}>
       <CardContent>

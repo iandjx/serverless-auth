@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { hasuraTopicList, repositoryList } from "../store";
 import {
-  searchReposWithTag,
-  searchRepos,
-  fetchAllTopics,
-  fetchAllRepos,
-} from "../queries/index";
+  selectedTopicList,
+  repoSearchString,
+  fetchTopicList,
+  searchRepoOnTag,
+  searchRepoOnString,
+} from "../store";
+
 import { useQuery, useManualQuery } from "graphql-hooks";
-import { useRecoilState, useSetRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import Chip from "@material-ui/core/Chip";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { makeStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
+import { fetchAllTopics } from "../queries";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -24,90 +26,51 @@ const useStyles = makeStyles((theme) => ({
 
 const SearchRepo = () => {
   //load topiclist
-  const topicList = useRecoilState(hasuraTopicList);
-  const setTopicList = useSetRecoilState(hasuraTopicList);
-  const projectList = useRecoilState(repositoryList);
-  const setProjectList = useSetRecoilState(repositoryList);
-  const { data: topicData } = useQuery(fetchAllTopics);
-  const [value, setValue] = React.useState([]);
+  const topicList = useRecoilValue(fetchTopicList);
+  const [chipInput, updateChipInput] = useState([]);
+  const [searchString, updateSearchString] = useState("");
+  const searchRepoWithTag = useRecoilValue(searchRepoOnTag);
 
-  useEffect(() => {
-    setTopicList(topicData);
-  }, [topicData]);
-  const { data: repoData } = useQuery(fetchAllRepos);
-  useEffect(() => {
-    setProjectList(repoData);
-  }, [repoData]);
-  const [inputValue, setInput] = useState("");
-  const changeValue = (event) => {
-    const { value } = event.target;
-    setInput(value);
-  };
-  const [searchRepositories, { data: searchResult }] = useManualQuery(
-    searchRepos,
-    { variables: { _similar: `%${inputValue}%` } }
+  const [_topicList, setSelectTopicList] = useRecoilState(selectedTopicList);
+  const [_repoSearchString, setRepositorySearchString] = useRecoilState(
+    repoSearchString
   );
+  const searchRepoWithString = useRecoilValue(searchRepoOnString);
 
-  const [searchRepositoriesWithTag] = useManualQuery(searchReposWithTag);
-
-  const fetchRepositoriesWithTag = async () => {
-    const idArray = value.map((val) => val.id);
-    const result = await searchRepositoriesWithTag({
-      variables: { _in: idArray, _similar: `%${inputValue}%` },
-    });
-    console.log(result);
-    return result;
+  const handleClicka = () => {
+    setSelectTopicList(chipInput);
+    setRepositorySearchString(searchString);
   };
-
-  let chipDataSource = [];
-  let cleanedData = [];
-
-  if (topicList[0] !== undefined && topicList[0].topics !== undefined) {
-    cleanedData = [...topicList[0].topics];
-    chipDataSource = topicList[0].topics.reduce((acc, topic) => {
-      acc.push(topic.name);
-      return acc;
-    }, []);
-  }
-
-  //user enters search string or
-
-  //user enters topics in chips
-
-  //user hits search
-  //if search string only then use query for search string
-  // if search string and tag  then other query
-  // else same other query
-
-  //update recoil project list
   const classes = useStyles();
 
   return (
     <div className="addItemContainer">
-      {console.log(cleanedData)}
-      {/* {console.log(chipDataSource)} */}
+      {console.log(searchRepoWithTag)}
+      {console.log("sfd")}
+      {console.log(searchRepoWithString)}
+      <div>{JSON.stringify(searchRepoWithString)}</div>
       <p className="addItemText">Enter item :</p>
       <input
         className="addItemInput"
         type="text"
-        value={inputValue}
-        onChange={(e) => changeValue(e)}
+        value={searchString}
+        onChange={(event) => {
+          const { value } = event.target;
+          updateSearchString(value);
+        }}
       />
-      <button className="addInputButton" onClick={searchRepositories}>
-        Add
-      </button>
-      {searchResult && <p>{JSON.stringify(searchResult)}</p>}
+      <div>{JSON.stringify(searchRepoWithTag)}</div>
+
       <div className={classes.root}>
-        <div>{`value: ${value !== null ? `'${value}'` : "null"}`}</div>
-        {console.log(value)}
+        <div>{`value: ${chipInput !== null ? `'${chipInput}'` : "null"}`}</div>
         <Autocomplete
-          value={value}
+          value={chipInput}
           onChange={(event, newValue) => {
-            setValue(newValue);
+            updateChipInput(newValue);
           }}
           multiple
           id="tags-outlined"
-          options={cleanedData}
+          options={topicList.topics}
           getOptionLabel={(option) => option.name}
           filterSelectedOptions
           renderInput={(params) => (
@@ -120,7 +83,7 @@ const SearchRepo = () => {
           )}
         />
       </div>
-      <button className="addInputButton" onClick={fetchRepositoriesWithTag}>
+      <button className="addInputButton" onClick={handleClicka}>
         Add
       </button>
     </div>

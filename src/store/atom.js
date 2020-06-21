@@ -19,3 +19,13 @@ export const hasuraTopicList = atom({
   key: "hasuraTopicList",
   default: [],
 });
+
+export const selectedTopicList = atom({
+  key: "selectedTopicList",
+  default: [],
+});
+
+export const repoSearchString = atom({
+  key: "repoSearchString",
+  default: "",
+});

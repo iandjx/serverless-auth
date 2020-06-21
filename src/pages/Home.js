@@ -7,18 +7,18 @@ import { currentUser, repositoryList, hasuraTopicList } from "../store";
 import { useQuery, useManualQuery } from "graphql-hooks";
 import { fetchAllRepos, fetchAllTopics } from "../queries/index";
 import SearchRepo from "../components/SearchRepo";
+import RepositoryList from "../components/RepositoryList";
 
 require("isomorphic-fetch");
 
 const Home = () => {
-  const updateRepoList = useSetRecoilState(repositoryList);
-  const projectList = useRecoilState(repositoryList);
-
+  //change useRecoilState to useRecoil values for selectors
+  //refactor
+  const [projectList, updateRepoList] = useRecoilState(repositoryList);
   const topicList = useRecoilState(hasuraTopicList);
   const updateTopicList = useSetRecoilState(hasuraTopicList);
 
-  const setCurrentUser = useSetRecoilState(currentUser);
-  const user = useRecoilState(currentUser);
+  const [user, setCurrentUser] = useRecoilState(currentUser);
 
   const { data: repoData } = useQuery(fetchAllRepos);
   useEffect(() => {
@@ -44,8 +44,9 @@ const Home = () => {
 
   return (
     <div>
-      {console.log(projectList, topicList, user)}
+      {console.log(projectList)}
       <SearchRepo />
+      <RepositoryList />
     </div>
   );
 };

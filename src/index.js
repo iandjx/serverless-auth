@@ -30,10 +30,12 @@ ReactDOM.render(
   <React.StrictMode>
     <BrowserRouter>
       <RecoilRoot>
-        <CssBaseline />
-        <ClientContext.Provider value={client}>
-          <App />
-        </ClientContext.Provider>
+        <React.Suspense fallback={<div>Loading...</div>}>
+          <CssBaseline />
+          <ClientContext.Provider value={client}>
+            <App />
+          </ClientContext.Provider>
+        </React.Suspense>
       </RecoilRoot>
     </BrowserRouter>
   </React.StrictMode>,
