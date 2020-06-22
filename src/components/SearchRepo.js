@@ -5,6 +5,8 @@ import {
   fetchTopicList,
   searchRepoOnTag,
   searchRepoOnString,
+  searchRepoFinal,
+  fetchRepoList,
 } from "../store";
 
 import { useQuery, useManualQuery } from "graphql-hooks";
@@ -29,13 +31,13 @@ const SearchRepo = () => {
   const topicList = useRecoilValue(fetchTopicList);
   const [chipInput, updateChipInput] = useState([]);
   const [searchString, updateSearchString] = useState("");
-  const searchRepoWithTag = useRecoilValue(searchRepoOnTag);
+  const searchRepo = useRecoilValue(searchRepoFinal);
 
   const [_topicList, setSelectTopicList] = useRecoilState(selectedTopicList);
   const [_repoSearchString, setRepositorySearchString] = useRecoilState(
     repoSearchString
   );
-  const searchRepoWithString = useRecoilValue(searchRepoOnString);
+  // const searchRepoWithString = useRecoilValue(searchRepoOnString);
 
   const handleClicka = () => {
     setSelectTopicList(chipInput);
@@ -45,10 +47,7 @@ const SearchRepo = () => {
 
   return (
     <div className="addItemContainer">
-      {console.log(searchRepoWithTag)}
-      {console.log("sfd")}
-      {console.log(searchRepoWithString)}
-      <div>{JSON.stringify(searchRepoWithString)}</div>
+      <div>{JSON.stringify(searchRepo)}</div>
       <p className="addItemText">Enter item :</p>
       <input
         className="addItemInput"
@@ -59,7 +58,7 @@ const SearchRepo = () => {
           updateSearchString(value);
         }}
       />
-      <div>{JSON.stringify(searchRepoWithTag)}</div>
+      <div>{JSON.stringify(searchRepo)}</div>
 
       <div className={classes.root}>
         <div>{`value: ${chipInput !== null ? `'${chipInput}'` : "null"}`}</div>

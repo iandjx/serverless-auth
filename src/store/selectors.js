@@ -7,10 +7,14 @@ import {
   searchRepos,
   searchReposWithTag,
 } from "../queries/index";
-import { selectedTopicList, repoSearchString } from "./index";
+import { selectedTopicList, repoSearchString, fetchRepoTrigger } from "./index";
+import { Recoil } from "recoil";
 require("isomorphic-fetch");
 
 const endpoint = "http://code-accel-backend.herokuapp.com/v1/graphql";
+
+const authEndpoint =
+  process.env.NODE_ENV === "development" ? "/.netlify/functions" : "/api";
 
 const graphQLClient = new GraphQLClient(endpoint, {
   headers: {
@@ -20,13 +24,19 @@ const graphQLClient = new GraphQLClient(endpoint, {
 
 export const fetchRepoList = selector({
   key: "repoListSelector",
+
   get: async ({ get }) => {
+    get(fetchRepoTrigger);
     try {
       const response = await graphQLClient.request(fetchAllRepos);
-      const data = await response.json();
-      return data;
+      return response;
     } catch (error) {
       throw error;
+    }
+  },
+  set: ({ set }, value) => {
+    if (value instanceof Recoil.DefaultValue) {
+      set(fetchRepoTrigger, (v) => v + 1);
     }
   },
 });
@@ -36,7 +46,6 @@ export const fetchTopicList = selector({
   get: async ({ get }) => {
     try {
       const response = await graphQLClient.request(fetchAllTopics);
-      //   const data = await response.json();
       return response;
     } catch (error) {
       throw error;
@@ -48,7 +57,7 @@ export const fetchUserDetails = selector({
   key: "userDetailsSelector",
   get: async ({ get }) => {
     try {
-      const response = await fetch(`${endpoint}/auth/status`);
+      const response = await fetch(`${authEndpoint}/auth/status`);
       const data = await response.json();
       return data;
     } catch (error) {
@@ -60,25 +69,7 @@ export const fetchUserDetails = selector({
 //add search repo with tag and search repo with string only
 export const searchRepoOnTag = selector({
   key: "repoOnTagSelector",
-  get: async ({ get }) => {
-    if (get(selectedTopicList).length === 0) {
-      return;
-    }
-    try {
-      const idArray = get(selectedTopicList).map((val) => val.id);
-      const variables = {
-        _in: idArray,
-        _similar: `%${get(repoSearchString)}%`,
-      };
-      const response = await graphQLClient.request(
-        searchReposWithTag,
-        variables
-      );
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  },
+  get: async ({ get }) => {},
 });
 
 export const searchRepoOnString = selector({
@@ -96,5 +87,36 @@ export const searchRepoOnString = selector({
     }
   },
 });
-//after adding new repo into hasura
-//
+
+export const searchRepoFinal = selector({
+  key: "searchRepoFinalSelector",
+  get: async ({ get }) => {
+    if (get(repoSearchString) !== "" || get(selectedTopicList).length === 0) {
+      try {
+        const variables = { _similar: `%${get(repoSearchString)}%` };
+        const response = await graphQLClient.request(searchRepos, variables);
+        return response;
+      } catch (error) {
+        throw error;
+      }
+    }
+
+    if (get(selectedTopicList).length !== 0) {
+      try {
+        const idArray = get(selectedTopicList).map((val) => val.id);
+        const variables = {
+          _in: idArray,
+          _similar: `%${get(repoSearchString)}%`,
+        };
+        const response = await graphQLClient.request(
+          searchReposWithTag,
+          variables
+        );
+        return response;
+      } catch (error) {
+        throw error;
+      }
+    }
+    return;
+  },
+});

@@ -29,3 +29,8 @@ export const repoSearchString = atom({
   key: "repoSearchString",
   default: "",
 });
+
+export const fetchRepoTrigger = atom({
+  key: "fetchRepoTrigger",
+  default: 0,
+});

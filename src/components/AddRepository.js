@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@material-ui/core";
-import { useSetRecoilState, useRecoilState } from "recoil";
-import { currentUser, userRepoList, hasuraTopicList } from "../store";
+import { useSetRecoilState, useRecoilState, useRecoilValue } from "recoil";
+import {
+  currentUser,
+  userRepoList,
+  hasuraTopicList,
+  fetchUserDetails,
+} from "../store";
 import TextField from "@material-ui/core/TextField";
 import { GraphQLClient } from "graphql-request";
 import {
@@ -16,7 +21,7 @@ import { useQuery, useMutation } from "graphql-hooks";
 const endpoint = `https://api.github.com/graphql`;
 
 const AddRepository = () => {
-  const user = useRecoilState(currentUser);
+  const user = useRecoilValue(fetchUserDetails);
   const [repoSearchString, setRepoSearchString] = useState("");
   const topicList = useRecoilState(hasuraTopicList);
   const setTopicList = useSetRecoilState(hasuraTopicList);
@@ -25,7 +30,7 @@ const AddRepository = () => {
 
   const graphQLClient = new GraphQLClient(endpoint, {
     headers: {
-      authorization: `Bearer ${user[0].access_token}`,
+      authorization: `Bearer ${user.access_token}`,
     },
   });
 
@@ -33,7 +38,7 @@ const AddRepository = () => {
 
   const handleClick = async () => {
     const variables = {
-      search_string: repoSearchString + ` user:${user[0].username}`,
+      search_string: repoSearchString + ` user:${user.username}`,
     };
     const data = await graphQLClient.request(repoSearchQuery, variables);
     setUserRepoList(data);
@@ -70,11 +75,11 @@ const AddRepository = () => {
         language: repo.primaryLanguage.name,
         name: repo.name.toLowerCase(),
         owner: repo.owner.login,
-        owner_id: user[0].id,
+        owner_id: user.id,
         owner_node_id: repo.owner.id,
         url: repo.url,
       },
-    });
+    }).then((res) => console.log("hello this works"));
 
     if (topicsToInsert.length > 0) {
       addNewTopics({ variables: { objects: [...topicsToInsert] } });

@@ -5,6 +5,7 @@ export {
   hasuraTopicList,
   selectedTopicList,
   repoSearchString,
+  fetchRepoTrigger,
 } from "./atom";
 
 export {
@@ -13,4 +14,5 @@ export {
   fetchUserDetails,
   searchRepoOnTag,
   searchRepoOnString,
+  searchRepoFinal,
 } from "./selectors";
