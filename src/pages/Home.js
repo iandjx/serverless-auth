@@ -18,12 +18,13 @@ import RepositoryList from "../components/RepositoryList";
 const Home = () => {
   const searchResults = useRecoilValue(searchRepoFinal);
   const currentUser = useRecoilValue(fetchUserDetails);
+  //TODO add auth check to display login and add repo
 
   return (
     <div>
       {console.log(currentUser)}
       <SearchRepo />
-      {/* <RepositoryList /> */}
+      <RepositoryList />
     </div>
   );
 };

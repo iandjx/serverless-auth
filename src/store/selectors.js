@@ -61,7 +61,7 @@ export const fetchUserDetails = selector({
       const data = await response.json();
       return data;
     } catch (error) {
-      throw error;
+      return { error: "not authorized" };
     }
   },
 });

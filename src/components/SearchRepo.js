@@ -27,7 +27,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const SearchRepo = () => {
-  //load topiclist
+  //TODO Change search repo string to language instead.
+  //people wont search repos by name
   const topicList = useRecoilValue(fetchTopicList);
   const [chipInput, updateChipInput] = useState([]);
   const [searchString, updateSearchString] = useState("");
@@ -47,7 +48,6 @@ const SearchRepo = () => {
 
   return (
     <div className="addItemContainer">
-      <div>{JSON.stringify(searchRepo)}</div>
       <p className="addItemText">Enter item :</p>
       <input
         className="addItemInput"
@@ -58,7 +58,6 @@ const SearchRepo = () => {
           updateSearchString(value);
         }}
       />
-      <div>{JSON.stringify(searchRepo)}</div>
 
       <div className={classes.root}>
         <div>{`value: ${chipInput !== null ? `'${chipInput}'` : "null"}`}</div>

@@ -1,3 +1,5 @@
+//TODO refactor to use selectors when needed
+
 import React, { useEffect, useState } from "react";
 import { Button } from "@material-ui/core";
 import { useSetRecoilState, useRecoilState, useRecoilValue } from "recoil";
@@ -79,7 +81,7 @@ const AddRepository = () => {
         owner_node_id: repo.owner.id,
         url: repo.url,
       },
-    }).then((res) => console.log("hello this works"));
+    }).then((_res) => console.log("hello this works"));
 
     if (topicsToInsert.length > 0) {
       addNewTopics({ variables: { objects: [...topicsToInsert] } });

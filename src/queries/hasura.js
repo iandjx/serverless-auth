@@ -57,7 +57,7 @@ export const searchReposWithTag = `query searchReposWithTag($_in: [String!]!, $_
   `;
 
 export const searchRepos = `query searchRepos ( $_similar: String!) {
-    repositories(where: {repo_topics: {repository: {name: {_similar: $_similar}}}}) {
+    repositories(where: {name: {_similar: $_similar}}) {
       description
       id
       language
