@@ -9,6 +9,8 @@ import {
   hasuraTopicList,
   searchRepoFinal,
   fetchUserDetails,
+  selectedTopicList,
+  repoSearchString,
 } from "../store";
 import { useQuery, useManualQuery } from "graphql-hooks";
 import { fetchAllRepos, fetchAllTopics } from "../queries/index";
@@ -19,10 +21,18 @@ const Home = () => {
   const searchResults = useRecoilValue(searchRepoFinal);
   const currentUser = useRecoilValue(fetchUserDetails);
   //TODO add auth check to display login and add repo
+  const [_topicList, setSelectTopicList] = useRecoilState(selectedTopicList);
+  const [_repoSearchString, setRepositorySearchString] = useRecoilState(
+    repoSearchString
+  );
+
+  useEffect(() => {
+    setSelectTopicList([]);
+    setRepositorySearchString("");
+  }, []);
 
   return (
     <div>
-      {console.log(currentUser)}
       <SearchRepo />
       <RepositoryList />
     </div>

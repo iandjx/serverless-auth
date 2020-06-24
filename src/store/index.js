@@ -6,13 +6,13 @@ export {
   selectedTopicList,
   repoSearchString,
   fetchRepoTrigger,
+  forceTodoUpdate,
+  repoResult,
 } from "./atom";
 
 export {
   fetchRepoList,
   fetchTopicList,
   fetchUserDetails,
-  searchRepoOnTag,
-  searchRepoOnString,
   searchRepoFinal,
 } from "./selectors";

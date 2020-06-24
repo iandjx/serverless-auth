@@ -5,9 +5,11 @@ import { repositoryList, fetchRepoList, searchRepoFinal } from "../store";
 
 const RepositoryList = () => {
   const { repositories } = useRecoilValue(fetchRepoList);
+
   const { repositories: searchedRepositories } = useRecoilValue(
     searchRepoFinal
   );
+
   let reposToDisplay;
   if (searchedRepositories) {
     reposToDisplay = searchedRepositories.map((project) => (
@@ -22,7 +24,7 @@ const RepositoryList = () => {
       </React.Fragment>
     ));
   }
-  return <div>{reposToDisplay}</div>;
+  return <div>{reposToDisplay};</div>;
 };
 
 export default RepositoryList;

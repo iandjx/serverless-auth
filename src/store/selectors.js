@@ -7,7 +7,13 @@ import {
   searchRepos,
   searchReposWithTag,
 } from "../queries/index";
-import { selectedTopicList, repoSearchString, fetchRepoTrigger } from "./index";
+import {
+  selectedTopicList,
+  repoSearchString,
+  fetchRepoTrigger,
+  forceTodoUpdate,
+  repoResult,
+} from "./index";
 import { Recoil } from "recoil";
 require("isomorphic-fetch");
 
@@ -23,20 +29,16 @@ const graphQLClient = new GraphQLClient(endpoint, {
 });
 
 export const fetchRepoList = selector({
-  key: "repoListSelector",
+  key: "fetchRepoList",
 
   get: async ({ get }) => {
-    get(fetchRepoTrigger);
+    // get(fetchRepoTrigger);
     try {
+      get(forceTodoUpdate);
       const response = await graphQLClient.request(fetchAllRepos);
       return response;
     } catch (error) {
       throw error;
-    }
-  },
-  set: ({ set }, value) => {
-    if (value instanceof Recoil.DefaultValue) {
-      set(fetchRepoTrigger, (v) => v + 1);
     }
   },
 });
@@ -66,33 +68,16 @@ export const fetchUserDetails = selector({
   },
 });
 
-//add search repo with tag and search repo with string only
-export const searchRepoOnTag = selector({
-  key: "repoOnTagSelector",
-  get: async ({ get }) => {},
-});
-
-export const searchRepoOnString = selector({
-  key: "repoOnStringSelector",
-  get: async ({ get }) => {
-    if (get(repoSearchString) === "" || get(selectedTopicList).length > 0) {
-      return;
-    }
-    try {
-      const variables = { _similar: `%${get(repoSearchString)}%` };
-      const response = await graphQLClient.request(searchRepos, variables);
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  },
-});
-
 export const searchRepoFinal = selector({
   key: "searchRepoFinalSelector",
   get: async ({ get }) => {
+    if (get(repoSearchString) === "" && get(selectedTopicList).length === 0) {
+      console.log("cancel");
+      return [];
+    }
     if (get(repoSearchString) !== "" || get(selectedTopicList).length === 0) {
       try {
+        console.log("second if");
         const variables = { _similar: `%${get(repoSearchString)}%` };
         const response = await graphQLClient.request(searchRepos, variables);
         return response;

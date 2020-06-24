@@ -35,3 +35,12 @@ export const fetchRepoTrigger = atom({
   default: 0,
 });
 //TODO add language atom
+
+export const forceTodoUpdate = atom({
+  key: "forceTODO",
+  default: 0,
+});
+export const repoResult = atom({
+  key: "repoResult",
+  default: [],
+});

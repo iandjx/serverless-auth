@@ -2,12 +2,18 @@
 
 import React, { useEffect, useState } from "react";
 import { Button } from "@material-ui/core";
-import { useSetRecoilState, useRecoilState, useRecoilValue } from "recoil";
 import {
-  currentUser,
+  useSetRecoilState,
+  useRecoilState,
+  useRecoilValue,
+  useResetRecoilState,
+} from "recoil";
+import {
   userRepoList,
   hasuraTopicList,
   fetchUserDetails,
+  fetchRepoList,
+  forceTodoUpdate,
 } from "../store";
 import TextField from "@material-ui/core/TextField";
 import { GraphQLClient } from "graphql-request";
@@ -19,23 +25,28 @@ import {
   addREpoTopics,
 } from "../queries/index";
 import { useQuery, useMutation } from "graphql-hooks";
+import { useHistory } from "react-router-dom";
 
 const endpoint = `https://api.github.com/graphql`;
 
 const AddRepository = () => {
+  const history = useHistory();
+
   const user = useRecoilValue(fetchUserDetails);
+  const { repositories } = useRecoilValue(fetchRepoList);
   const [repoSearchString, setRepoSearchString] = useState("");
   const topicList = useRecoilState(hasuraTopicList);
   const setTopicList = useSetRecoilState(hasuraTopicList);
-  const setUserRepoList = useSetRecoilState(userRepoList);
-  const userRepositoryList = useRecoilState(userRepoList);
+  const [userRepositoryList, setUserRepoList] = useRecoilState(userRepoList);
+  const resetRepoList = useResetRecoilState(fetchRepoList);
+  const todoUpdates = useSetRecoilState(forceTodoUpdate);
+  const forceUpdate = () => todoUpdates((n) => n + 1);
 
   const graphQLClient = new GraphQLClient(endpoint, {
     headers: {
       authorization: `Bearer ${user.access_token}`,
     },
   });
-
   const { loading, data, error } = useQuery(fetchAllTopics);
 
   const handleClick = async () => {
@@ -43,7 +54,13 @@ const AddRepository = () => {
       search_string: repoSearchString + ` user:${user.username}`,
     };
     const data = await graphQLClient.request(repoSearchQuery, variables);
-    setUserRepoList(data);
+    const {
+      search: { edges: githubRepos },
+    } = data;
+    const reposToDisplay = githubRepos.filter(
+      (index) => !repositories.some((repo) => repo.id === index.node.id)
+    );
+    setUserRepoList(reposToDisplay);
   };
 
   const [addNewRepo] = useMutation(createNewRepo);
@@ -51,7 +68,6 @@ const AddRepository = () => {
   const [linkRepoTopic] = useMutation(addREpoTopics);
 
   const insertRepository = (repo) => {
-    //compare exising topics from current repo
     const repoTopics = repo.repositoryTopics.nodes.reduce((acc, node) => {
       acc.push({ id: node.topic.id, name: node.topic.name });
       return acc;
@@ -69,7 +85,6 @@ const AddRepository = () => {
       );
     }
 
-    //add new repo
     addNewRepo({
       variables: {
         description: repo.description,
@@ -81,8 +96,10 @@ const AddRepository = () => {
         owner_node_id: repo.owner.id,
         url: repo.url,
       },
-    }).then((_res) => console.log("hello this works"));
-
+    }).then((_) => {
+      forceUpdate();
+      history.push("/");
+    });
     if (topicsToInsert.length > 0) {
       addNewTopics({ variables: { objects: [...topicsToInsert] } });
     }
@@ -98,7 +115,6 @@ const AddRepository = () => {
   }, [data]);
   return (
     <div>
-      {data && <p>{JSON.stringify(data)}</p>}
       <TextField
         id="standard-basic"
         value={repoSearchString}
@@ -113,9 +129,15 @@ const AddRepository = () => {
       >
         Search
       </Button>
-
-      {userRepositoryList[0].search !== undefined ? (
-        userRepositoryList[0].search.edges.map((repo) => (
+      <Button
+        onClick={() => {
+          resetRepoList();
+        }}
+      >
+        refresh list
+      </Button>
+      {userRepositoryList !== undefined ? (
+        userRepositoryList.map((repo) => (
           <React.Fragment>
             <p key={repo.node.id}>{repo.node.name}</p>
             <Button onClick={() => insertRepository(repo.node)}>Connect</Button>

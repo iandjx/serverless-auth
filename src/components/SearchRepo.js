@@ -1,21 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   selectedTopicList,
   repoSearchString,
   fetchTopicList,
-  searchRepoOnTag,
-  searchRepoOnString,
   searchRepoFinal,
-  fetchRepoList,
+  repoResult,
 } from "../store";
 
-import { useQuery, useManualQuery } from "graphql-hooks";
 import { useRecoilState, useRecoilValue } from "recoil";
-import Chip from "@material-ui/core/Chip";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { makeStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
-import { fetchAllTopics } from "../queries";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -32,7 +27,7 @@ const SearchRepo = () => {
   const topicList = useRecoilValue(fetchTopicList);
   const [chipInput, updateChipInput] = useState([]);
   const [searchString, updateSearchString] = useState("");
-  const searchRepo = useRecoilValue(searchRepoFinal);
+  const [repoResulta] = useRecoilState(repoResult);
 
   const [_topicList, setSelectTopicList] = useRecoilState(selectedTopicList);
   const [_repoSearchString, setRepositorySearchString] = useRecoilState(
