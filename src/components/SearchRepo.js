@@ -5,6 +5,8 @@ import {
   fetchTopicList,
   searchRepoFinal,
   repoResult,
+  fetchLanguageList,
+  selectedLanguage,
 } from "../store";
 
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -26,34 +28,32 @@ const SearchRepo = () => {
   //people wont search repos by name
   const topicList = useRecoilValue(fetchTopicList);
   const [chipInput, updateChipInput] = useState([]);
-  const [searchString, updateSearchString] = useState("");
-  const [repoResulta] = useRecoilState(repoResult);
 
   const [_topicList, setSelectTopicList] = useRecoilState(selectedTopicList);
   const [_repoSearchString, setRepositorySearchString] = useRecoilState(
     repoSearchString
   );
+  const [_language, setSelectedLanguage] = useRecoilState(selectedLanguage);
   // const searchRepoWithString = useRecoilValue(searchRepoOnString);
+  //get language list
+  const { repositories: languageList } = useRecoilValue(fetchLanguageList);
+  const hasuraLanguageList = languageList.map((ele) => {
+    return ele.language;
+  });
+  let uniqueHasuraLanguageList = [...new Set(hasuraLanguageList), ""];
+  const [languageInput, updateLanguageInput] = useState("");
+  console.log(languageInput);
 
   const handleClicka = () => {
     setSelectTopicList(chipInput);
-    setRepositorySearchString(searchString);
+    setSelectedLanguage(languageInput);
+    updateChipInput([]);
+    updateLanguageInput("");
   };
   const classes = useStyles();
 
   return (
     <div className="addItemContainer">
-      <p className="addItemText">Enter item :</p>
-      <input
-        className="addItemInput"
-        type="text"
-        value={searchString}
-        onChange={(event) => {
-          const { value } = event.target;
-          updateSearchString(value);
-        }}
-      />
-
       <div className={classes.root}>
         <div>{`value: ${chipInput !== null ? `'${chipInput}'` : "null"}`}</div>
         <Autocomplete
@@ -76,6 +76,19 @@ const SearchRepo = () => {
           )}
         />
       </div>
+      <Autocomplete
+        id="combo-box-demo"
+        value={languageInput}
+        onChange={(event, newValue) => {
+          updateLanguageInput(newValue);
+        }}
+        options={uniqueHasuraLanguageList}
+        getOptionLabel={(option) => option}
+        style={{ width: 300 }}
+        renderInput={(params) => (
+          <TextField {...params} label="Combo box" variant="outlined" />
+        )}
+      />
       <button className="addInputButton" onClick={handleClicka}>
         Add
       </button>

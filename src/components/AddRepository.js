@@ -23,6 +23,7 @@ import {
   createNewRepo,
   insertNewTopic,
   addREpoTopics,
+  fetchAllLanguages,
 } from "../queries/index";
 import { useQuery, useMutation } from "graphql-hooks";
 import { useHistory } from "react-router-dom";

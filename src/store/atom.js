@@ -25,6 +25,16 @@ export const selectedTopicList = atom({
   default: [],
 });
 
+export const hasuraLanguageList = atom({
+  key: "hasuraLanguageList",
+  default: [],
+});
+
+export const selectedLanguage = atom({
+  key: "selectedLanguage",
+  default: "",
+});
+
 export const repoSearchString = atom({
   key: "repoSearchString",
   default: "",

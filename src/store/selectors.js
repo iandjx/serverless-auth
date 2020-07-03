@@ -4,15 +4,15 @@ import { selector } from "recoil";
 import {
   fetchAllRepos,
   fetchAllTopics,
-  searchRepos,
-  searchReposWithTag,
+  fetchAllLanguages,
+  searchReposWithTagAndLanguage,
+  searchRepoByLanguage,
 } from "../queries/index";
 import {
   selectedTopicList,
   repoSearchString,
-  fetchRepoTrigger,
   forceTodoUpdate,
-  repoResult,
+  selectedLanguage,
 } from "./index";
 import { Recoil } from "recoil";
 require("isomorphic-fetch");
@@ -55,6 +55,19 @@ export const fetchTopicList = selector({
   },
 });
 
+export const fetchLanguageList = selector({
+  key: "languageListSelector",
+  get: async ({ get }) => {
+    try {
+      const response = await graphQLClient.request(fetchAllLanguages);
+
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+});
+
 export const fetchUserDetails = selector({
   key: "userDetailsSelector",
   get: async ({ get }) => {
@@ -71,15 +84,41 @@ export const fetchUserDetails = selector({
 export const searchRepoFinal = selector({
   key: "searchRepoFinalSelector",
   get: async ({ get }) => {
-    if (get(repoSearchString) === "" && get(selectedTopicList).length === 0) {
-      console.log("cancel");
+    if (
+      get(repoSearchString) === "" &&
+      get(selectedTopicList).length === 0 &&
+      get(selectedLanguage) === ""
+    ) {
+      console.log("lala");
       return [];
     }
-    if (get(repoSearchString) !== "" || get(selectedTopicList).length === 0) {
+    if (get(selectedLanguage) !== "" && get(selectedTopicList).length !== 0) {
+      console.log("woohoo");
+
       try {
-        console.log("second if");
-        const variables = { _similar: `%${get(repoSearchString)}%` };
-        const response = await graphQLClient.request(searchRepos, variables);
+        const idArray = get(selectedTopicList).map((val) => val.id);
+        const variables = {
+          _in: idArray,
+          _similar: `%${get(selectedLanguage)}%`,
+        };
+        const response = await graphQLClient.request(
+          searchReposWithTagAndLanguage,
+          variables
+        );
+        return response;
+      } catch (error) {
+        throw error;
+      }
+    }
+
+    if (get(selectedLanguage) !== "" || get(selectedTopicList).length === 0) {
+      console.log(1);
+      try {
+        const variables = { _eq: get(selectedLanguage) };
+        const response = await graphQLClient.request(
+          searchRepoByLanguage,
+          variables
+        );
         return response;
       } catch (error) {
         throw error;
@@ -87,14 +126,16 @@ export const searchRepoFinal = selector({
     }
 
     if (get(selectedTopicList).length !== 0) {
+      console.log(2);
+
       try {
         const idArray = get(selectedTopicList).map((val) => val.id);
         const variables = {
           _in: idArray,
-          _similar: `%${get(repoSearchString)}%`,
+          _similar: `%${get(selectedLanguage)}%`,
         };
         const response = await graphQLClient.request(
-          searchReposWithTag,
+          searchReposWithTagAndLanguage,
           variables
         );
         return response;

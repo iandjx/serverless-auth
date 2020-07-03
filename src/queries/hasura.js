@@ -5,6 +5,12 @@ export const fetchAllTopics = `query fetchTopics {
     }
   }`;
 
+export const fetchAllLanguages = `query fetchAllLanguages {
+  repositories {
+    language
+  }
+}
+`;
 export const createNewRepo = `mutation createNewRepo($description: String = "", $id: String = "", $language: String = "", $name: String = "", $owner: String = "", $owner_id: uuid = "", $owner_node_id: String = "", $url: String = "") {
     insert_repositories_one(object: {description: $description, id: $id, language: $language, name: $name, owner: $owner, owner_id: $owner_id, owner_node_id: $owner_node_id, url: $url}) {
       description
@@ -56,8 +62,8 @@ export const searchReposWithTag = `query searchReposWithTag($_in: [String!]!, $_
   }
   `;
 
-export const searchRepos = `query searchRepos ( $_similar: String!) {
-    repositories(where: {name: {_similar: $_similar}}) {
+export const searchReposWithTagAndLanguage = `query searchReposWithTagAndLanguage($_similar: String , $_in: [String!]) {
+    repositories(where: {_and: {language: {_similar: $_similar}, repo_topics: {topic: {id: {_in: $_in}}}}}) {
       description
       id
       language
@@ -74,6 +80,7 @@ export const searchRepos = `query searchRepos ( $_similar: String!) {
     }
   }
   `;
+
 export const fetchAllRepos = `query {
     repositories {
       id
@@ -88,6 +95,26 @@ export const fetchAllRepos = `query {
           name
         }
       }
+    }
+  }
+  `;
+
+export const searchRepoByLanguage = `
+  query searchRepoByLanguage($_eq: String = "") {
+    repositories(where: {language: {_eq: $_eq}}) {
+      description
+      id
+      language
+      name
+      owner
+      owner_node_id
+      repo_topics {
+        topic {
+          id
+          name
+        }
+      }
+      url
     }
   }
   `;
