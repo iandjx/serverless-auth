@@ -43,7 +43,7 @@ export const insertNewTopic = `
 
 //if tag and search string present then use this
 // if tag only present use this query
-export const searchReposWithTag = `query searchReposWithTag($_in: [String!]!, $_similar: String!) {
+export const searchReposWithTag = `query searchReposWithTag($_in: [String], $_similar: String) {
     repositories(where: {repo_topics: {topic: {_and: {id: {_in: $_in}}}, repository: {name: {_similar: $_similar}}}}) {
       description
       id
@@ -62,7 +62,7 @@ export const searchReposWithTag = `query searchReposWithTag($_in: [String!]!, $_
   }
   `;
 
-export const searchReposWithTagAndLanguage = `query searchReposWithTagAndLanguage($_similar: String , $_in: [String!]) {
+export const searchReposWithTagAndLanguage = `query searchReposWithTagAndLanguage($_similar: String , $_in: [String]) {
     repositories(where: {_and: {language: {_similar: $_similar}, repo_topics: {topic: {id: {_in: $_in}}}}}) {
       description
       id
@@ -100,7 +100,7 @@ export const fetchAllRepos = `query {
   `;
 
 export const searchRepoByLanguage = `
-  query searchRepoByLanguage($_eq: String = "") {
+  query searchRepoByLanguage($_eq: String) {
     repositories(where: {language: {_eq: $_eq}}) {
       description
       id
