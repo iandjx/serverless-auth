@@ -11,17 +11,20 @@ export const fetchAllLanguages = `query fetchAllLanguages {
   }
 }
 `;
-export const createNewRepo = `mutation createNewRepo($description: String = "", $id: String = "", $language: String = "", $name: String = "", $owner: String = "", $owner_id: uuid = "", $owner_node_id: String = "", $url: String = "") {
-    insert_repositories_one(object: {description: $description, id: $id, language: $language, name: $name, owner: $owner, owner_id: $owner_id, owner_node_id: $owner_node_id, url: $url}) {
-      description
-      id
-      language
-      name
-      owner
-      owner_node_id
-      url
-    }
-  }`;
+export const createNewRepo = `mutation createNewRepo($description: String = "", $id: String = "", $language: String = "", $name: String = "", $owner: String = "", $owner_id: uuid = "", $owner_node_id: String = "", $url: String = "", $good_first_issue_count: Int = 10, $issue_hunt_count: Int = 10) {
+  insert_repositories_one(object: {description: $description, id: $id, language: $language, name: $name, owner: $owner, owner_id: $owner_id, owner_node_id: $owner_node_id, url: $url, good_first_issue_count: $good_first_issue_count, issue_hunt_count: $issue_hunt_count}) {
+    description
+    id
+    language
+    name
+    owner
+    owner_node_id
+    url
+    issue_hunt_count
+    good_first_issue_count
+  }
+}
+`;
 
 export const addREpoTopics = `mutation addREpoTopics($objects: [repo_topic_insert_input!]! ) {
     insert_repo_topic(objects: $objects) {
@@ -62,7 +65,7 @@ export const searchReposWithTag = `query searchReposWithTag($_in: [String], $_si
   }
   `;
 
-export const searchReposWithTagAndLanguage = `query searchReposWithTagAndLanguage($_similar: String , $_in: [String]) {
+export const searchReposWithTagAndLanguage = `query searchReposWithTagAndLanguage($_similar: String , $_in: [String!]) {
     repositories(where: {_and: {language: {_similar: $_similar}, repo_topics: {topic: {id: {_in: $_in}}}}}) {
       description
       id
@@ -81,23 +84,24 @@ export const searchReposWithTagAndLanguage = `query searchReposWithTagAndLanguag
   }
   `;
 
-export const fetchAllRepos = `query {
-    repositories {
-      id
-      name
-      owner
-      owner_node_id
-      url
-      description
-      language
-      repo_topics {
-        topic {
-          name
-        }
+export const fetchAllRepos = `{
+  repositories {
+    id
+    name
+    owner
+    owner_node_id
+    url
+    description
+    language
+    repo_topics {
+      topic {
+        name
       }
     }
+    issue_hunt_count
+    good_first_issue_count
   }
-  `;
+}`;
 
 export const searchRepoByLanguage = `
   query searchRepoByLanguage($_eq: String) {

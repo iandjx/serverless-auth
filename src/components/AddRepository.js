@@ -69,6 +69,7 @@ const AddRepository = () => {
   const [linkRepoTopic] = useMutation(addREpoTopics);
 
   const insertRepository = (repo) => {
+    console.log(repo);
     const repoTopics = repo.repositoryTopics.nodes.reduce((acc, node) => {
       acc.push({ id: node.topic.id, name: node.topic.name });
       return acc;
@@ -96,6 +97,8 @@ const AddRepository = () => {
         owner_id: user.id,
         owner_node_id: repo.owner.id,
         url: repo.url,
+        issue_hunt_count: repo.issueHunt.totalCount,
+        good_first_issue_count: repo.goodFirstIssue.totalCount,
       },
     }).then((_) => {
       forceUpdate();

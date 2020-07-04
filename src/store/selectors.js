@@ -84,11 +84,7 @@ export const fetchUserDetails = selector({
 export const searchRepoFinal = selector({
   key: "searchRepoFinalSelector",
   get: async ({ get }) => {
-    if (
-      get(repoSearchString) === "" &&
-      get(selectedTopicList).length === 0 &&
-      get(selectedLanguage) === ""
-    ) {
+    if (get(selectedTopicList).length === 0 && get(selectedLanguage) === "") {
       console.log("lala");
       return [];
     }

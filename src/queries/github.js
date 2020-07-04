@@ -23,6 +23,12 @@ export const repoSearchQuery = `query repoSearchQuery($search_string: String!) {
           primaryLanguage {
             name
           }
+          issueHunt: issues(states: OPEN, labels: [":dollar: Funded on Issuehunt"]) {
+            totalCount
+          }
+          goodFirstIssue: issues(states: OPEN, labels: ["good first issue"]) {
+            totalCount
+          }
         }
       }
     }
@@ -30,3 +36,9 @@ export const repoSearchQuery = `query repoSearchQuery($search_string: String!) {
 }
 
   `;
+
+export const loginCheck = `query { 
+    viewer { 
+      login
+    }
+  }`;

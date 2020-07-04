@@ -45,6 +45,12 @@ const Repository = (props) => {
         <Typography variant="overline" display="block">
           {project.language && project.language}
         </Typography>
+        <Typography variant="overline" display="block">
+          Funded issues {project.issue_hunt_count}
+        </Typography>
+        <Typography variant="overline" display="block">
+          Good first issues {project.good_first_issue_count}
+        </Typography>
       </CardContent>
     </Card>
   );

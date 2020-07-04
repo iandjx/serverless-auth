@@ -12,11 +12,8 @@ This project aims for newbie coders without existing ideas to work on to discove
 
 ## Todos
 
-- [ ] Add search by label (good-first-issue, :dollar: Funded on Issuehunt)
-- [ ] Display repositories
-- [ ] Simplify search repository mutation
+- [x] Add search by label (good-first-issue, :dollar: Funded on Issuehunt)
+- [x] Display repositories with good-first-issue and issue-hunt
 - [ ] Fix navbar
 - [ ] Fix auth flow to require auth when unregisterd or expired Github OAuth token
 - [ ] Use Authorization header instead of x-hasura-admin-secret
-- [ ]
-- [ ]
